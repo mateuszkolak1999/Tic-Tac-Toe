@@ -52,6 +52,10 @@ int main()
 			case STATE_MENU:
 			{
 				STATE = engine.menu.play(window, event, Vector2f(vec));
+				if (engine.menu.status)
+					engine.music.musicValueQuietly();
+				else
+					engine.music.musicValueLoudly();
 				break;
 			}
 			case STATE_GAME:

@@ -4,10 +4,32 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	loadBackground();
 	loadPlayButton();
 	loadExitButton();
+	loadVolumeButton();
 	window.draw(background);
 	window.draw(spriteName);
 	window.draw(playSprite);
 	window.draw(exitButton);
+
+	if (!status) {
+		volumeButton.setTexture(textureVolumeButtonOn);
+		window.draw(volumeButton);
+	}
+
+	if (status) {
+		volumeButton.setTexture(textureVolumeButtonOff);
+		window.draw(volumeButton);
+	}
+
+	if (volumeButton.getGlobalBounds().contains(mouse)) {
+		if (event.type == Event::MouseButtonPressed) {
+			if (event.mouseButton.button == Mouse::Left) {
+				if (!status)
+					status = true;
+				else 
+					status = false;
+			}
+		}
+	}
 
 	if (playSprite.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
@@ -56,4 +78,12 @@ void MenuState::loadBackground() {
 		std::cout << "Blad ladowania textury" << std::endl;
 	background.setTexture(textureBackground);
 	background.setPosition(0, 0);
+}
+
+void MenuState::loadVolumeButton() {
+	if (!textureVolumeButtonOn.loadFromFile("Resources/res/Sound On.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	if (!textureVolumeButtonOff.loadFromFile("Resources/res/Sound Off.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	volumeButton.setPosition(50, 750);
 }

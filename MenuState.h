@@ -3,7 +3,6 @@
 #include <iostream>
 #include "DEFINIONS.h"
 #include "GameState.h"
-#include "MusicClass.h"
 
 using namespace sf;
 class MenuState
@@ -25,9 +24,16 @@ public:
 	Texture textureBackground;
 	Sprite background;
 
+	//volue button
+	Texture textureVolumeButtonOn;
+	Texture textureVolumeButtonOff;
+	Sprite volumeButton;
+	bool status = false;
+
 	void loadPlayButton();
 	void loadExitButton();
 	void loadBackground();
+	void loadVolumeButton();
 	int play(RenderWindow& window, Event& event, Vector2f mouse);
 };
 
