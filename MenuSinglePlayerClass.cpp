@@ -1,42 +1,31 @@
-#include "MenuState.h"
+#include "MenuSinglePlayerClass.h"
 
-int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
+int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	loadBackground();
 	loadPlayButton();
 	loadExitButton();
-	loadVolumeButton();
 	window.draw(background);
 	window.draw(spriteName);
-	window.draw(playSprite);
+	window.draw(playEasy);
+	window.draw(playHard);
 	window.draw(exitButton);
 
-	if (!status) {
-		volumeButton.setTexture(textureVolumeButtonOn);
-		window.draw(volumeButton);
-	}
-
-	if (status) {
-		volumeButton.setTexture(textureVolumeButtonOff);
-		window.draw(volumeButton);
-	}
-
-	if (volumeButton.getGlobalBounds().contains(mouse)) {
+	if (playEasy.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
-				if (!status)
-					status = true;
-				else 
-					status = false;
+				std::cout << STATE << std::endl;
+				std::cout << "Wcisnalem tryb easy" << std::endl;
+				return STATE_GAME;
 			}
 		}
 	}
 
-	if (playSprite.getGlobalBounds().contains(mouse)) {
+	if (playHard.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << STATE << std::endl;
-				std::cout << "Wcisnalem start" << std::endl;
-				return STATE_MENU_SINGLEPLAYER;
+				std::cout << "Wcisnalem tryb hard" << std::endl;
+				return STATE_GAME_HARD;
 			}
 		}
 	}
@@ -49,14 +38,19 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 		}
 	}
 
-	return STATE_MENU;
+	return STATE_MENU_SINGLEPLAYER;
 }
 
-void MenuState::loadPlayButton() {
-	if (!texture.loadFromFile("Resources/res/Play Button.png"))
+void MenuSinglePlayerClass::loadPlayButton() {
+	if (!textureEasy.loadFromFile("Resources/res/Easy.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
-	playSprite.setTexture(texture);
-	playSprite.setPosition(375, 450);
+	playEasy.setTexture(textureEasy);
+	playEasy.setPosition(100, 450);
+
+	if (!textureHard.loadFromFile("Resources/res/Hard.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	playHard.setTexture(textureHard);
+	playHard.setPosition(500, 450);
 
 
 	if (!texture_name.loadFromFile("Resources/res/Game Title.png"))
@@ -66,24 +60,16 @@ void MenuState::loadPlayButton() {
 
 }
 
-void MenuState::loadExitButton() {
+void MenuSinglePlayerClass::loadExitButton() {
 	if (!textureExit.loadFromFile("Resources/res/Close Button.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	exitButton.setTexture(textureExit);
 	exitButton.setPosition(700, 750);
 }
 
-void MenuState::loadBackground() {
+void MenuSinglePlayerClass::loadBackground() {
 	if (!textureBackground.loadFromFile("Resources/res/Main_Menu_Background.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	background.setTexture(textureBackground);
 	background.setPosition(0, 0);
-}
-
-void MenuState::loadVolumeButton() {
-	if (!textureVolumeButtonOn.loadFromFile("Resources/res/Sound On.png"))
-		std::cout << "Blad ladowania textury" << std::endl;
-	if (!textureVolumeButtonOff.loadFromFile("Resources/res/Sound Off.png"))
-		std::cout << "Blad ladowania textury" << std::endl;
-	volumeButton.setPosition(50, 750);
 }
