@@ -2,6 +2,7 @@
 #include "DEFINIONS.h"
 #include "GameState.h"
 #include "MenuState.h"
+#include "MenuSinglePlayerClass.h"
 #include "PauseState.h"
 #include "EndState.h"
 #include "MusicClass.h"
@@ -14,6 +15,7 @@ class Engine
 {
 public:
 	MenuState menu;
+	MenuSinglePlayerClass menuSinglePlayer;
 	GameState game;
 	PauseState pause;
 	EndState end;
