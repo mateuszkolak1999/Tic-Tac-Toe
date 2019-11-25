@@ -38,7 +38,7 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << STATE << std::endl;
 				std::cout << "Wcisnalem start" << std::endl;
-				return STATE_GAME;
+				return STATE_MENU_SINGLEPLAYER;
 			}
 		}
 	}

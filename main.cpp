@@ -58,11 +58,16 @@ int main()
 					engine.music.musicValueLoudly();
 				break;
 			}
+			case STATE_MENU_SINGLEPLAYER:
+				STATE = engine.menuSinglePlayer.play(window, event, Vector2f(vec));
+				break;
 			case STATE_GAME:
 			{
 				STATE = engine.game.game(window, event, Vector2f(vec));
 				break;
 			}
+			case STATE_GAME_HARD:
+				break;
 			case STATE_PAUSE:
 				STATE = engine.pause.pause(window, event, Vector2f(vec));
 				break;
