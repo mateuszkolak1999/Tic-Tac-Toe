@@ -12,9 +12,17 @@ public:
 	Texture texture_name;
 	Sprite spriteName;
 
-	//do play
+	//jednoosobowy
 	Texture texture;
 	Sprite playSprite;
+
+	//tryb wieloosobowy
+	Texture textureMultiplayerButton;
+	Sprite multiplayerButton;
+
+	//ustawienia
+	Texture textureSettingsButton;
+	Sprite settingsButton;
 
 	//wyjscie
 	Texture textureExit;
