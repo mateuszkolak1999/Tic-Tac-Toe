@@ -8,8 +8,6 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	window.draw(background);
 	window.draw(spriteName);
 	window.draw(playSprite);
-	window.draw(multiplayerButton);
-	window.draw(settingsButton);
 	window.draw(exitButton);
 
 	if (!status) {
@@ -55,20 +53,11 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 }
 
 void MenuState::loadPlayButton() {
-	if (!texture.loadFromFile("Resources/res/Tryb jednoosobowy.png"))
+	if (!texture.loadFromFile("Resources/res/Play Button.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	playSprite.setTexture(texture);
-	playSprite.setPosition(320, 450);
+	playSprite.setPosition(375, 450);
 
-	if (!textureMultiplayerButton.loadFromFile("Resources/res/Tryb wieloosobowy.png"))
-		std::cout << "Blad ladowania textury" << std::endl;
-	multiplayerButton.setTexture(textureMultiplayerButton);
-	multiplayerButton.setPosition(320, 560);
-
-	if (!textureSettingsButton.loadFromFile("Resources/res/Ustawienia.png"))
-		std::cout << "Blad ladowania textury" << std::endl;
-	settingsButton.setTexture(textureSettingsButton);
-	settingsButton.setPosition(320, 670);
 
 	if (!texture_name.loadFromFile("Resources/res/Game Title.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
