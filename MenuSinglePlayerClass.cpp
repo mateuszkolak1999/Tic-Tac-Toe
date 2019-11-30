@@ -8,6 +8,7 @@ int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mou
 	window.draw(spriteName);
 	window.draw(playEasy);
 	window.draw(playHard);
+	window.draw(backButton);
 	window.draw(exitButton);
 
 	if (playEasy.getGlobalBounds().contains(mouse)) {
@@ -26,6 +27,16 @@ int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mou
 				std::cout << STATE << std::endl;
 				std::cout << "Wcisnalem tryb hard" << std::endl;
 				return STATE_GAME_HARD;
+			}
+		}
+	}
+
+	if (backButton.getGlobalBounds().contains(mouse)) {
+		if (event.type == Event::MouseButtonPressed) {
+			if (event.mouseButton.button == Mouse::Left) {
+				std::cout << STATE << std::endl;
+				std::cout << "Wcisnalem powrot" << std::endl;
+				return STATE_MENU;
 			}
 		}
 	}
@@ -57,6 +68,11 @@ void MenuSinglePlayerClass::loadPlayButton() {
 		std::cout << "Blad ladowania textury" << std::endl;
 	spriteName.setTexture(texture_name);
 	spriteName.setPosition(260, 70);
+
+	if (!textureBack.loadFromFile("Resources/res/Back Button.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	backButton.setTexture(textureBack);
+	backButton.setPosition(100, 770);
 
 }
 

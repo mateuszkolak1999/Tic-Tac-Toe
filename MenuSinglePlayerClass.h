@@ -25,6 +25,10 @@ public:
 	Texture textureBackground;
 	Sprite background;
 
+	//back button
+	Texture textureBack;
+	Sprite backButton;
+
 	void loadPlayButton();
 	void loadExitButton();
 	void loadBackground();
