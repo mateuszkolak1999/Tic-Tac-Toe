@@ -15,14 +15,17 @@ public:
 	//tryb jednoosobowy
 	Texture texture;
 	Sprite playSprite;
+	Texture texture_checked;
 
 	//tryb wieloosobowy
 	Texture textureMultiplayer;
 	Sprite multiplayerButton;
+	Texture multiplayerButton_checked;
 
 	//ustawienia
 	Texture textureSettings;
 	Sprite settingsButton;
+	Texture settingsButton_checked;
 
 	//wyjscie
 	Texture textureExit;
