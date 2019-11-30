@@ -24,12 +24,18 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 
 	if (volumeButton.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
-			if (event.mouseButton.button == Mouse::Left) {
-				if (!status)
-					status = true;
-				else 
-					status = false;
+			if (checker) {
+				if (event.mouseButton.button == Mouse::Left) {
+					checker = false;
+					if (!status)
+						status = true;
+					else
+						status = false;
+				}
 			}
+		}
+		else {
+			checker = true;
 		}
 	}
 

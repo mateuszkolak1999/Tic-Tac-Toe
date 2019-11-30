@@ -40,6 +40,7 @@ public:
 	Texture textureVolumeButtonOff;
 	Sprite volumeButton;
 	bool status = false;
+	bool checker = true;
 
 	void loadPlayButton();
 	void loadExitButton();
