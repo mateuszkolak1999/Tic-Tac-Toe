@@ -27,6 +27,11 @@ public:
 	Sprite settingsButton;
 	Texture settingsButton_checked;
 
+	//osi¹gniêcia
+	Texture textureAchievements;
+	Sprite achievementsButton;
+	Texture textureAchievements_checked;
+
 	//wyjscie
 	Texture textureExit;
 	Sprite exitButton;

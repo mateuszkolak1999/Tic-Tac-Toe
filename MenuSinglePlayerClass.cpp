@@ -6,26 +6,30 @@ int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mou
 	loadExitButton();
 	window.draw(background);
 	window.draw(spriteName);
-	window.draw(playEasy);
-	window.draw(playHard);
+	window.draw(play3x3);
+	window.draw(play5x5);
 	window.draw(backButton);
 	window.draw(exitButton);
 
-	if (playEasy.getGlobalBounds().contains(mouse)) {
+	if (play3x3.getGlobalBounds().contains(mouse)) {
+		play3x3.setTexture(texture3x3_checked);
+		window.draw(play3x3);
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << STATE << std::endl;
-				std::cout << "Wcisnalem tryb easy" << std::endl;
+				std::cout << "Wcisnalem tryb 3x3" << std::endl;
 				return STATE_GAME;
 			}
 		}
 	}
 
-	if (playHard.getGlobalBounds().contains(mouse)) {
+	if (play5x5.getGlobalBounds().contains(mouse)) {
+		play5x5.setTexture(texture5x5_checked);
+		window.draw(play5x5);
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << STATE << std::endl;
-				std::cout << "Wcisnalem tryb hard" << std::endl;
+				std::cout << "Wcisnalem tryb 5x5" << std::endl;
 				return STATE_GAME_HARD;
 			}
 		}
@@ -53,21 +57,27 @@ int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mou
 }
 
 void MenuSinglePlayerClass::loadPlayButton() {
-	if (!textureEasy.loadFromFile("Resources/res/Easy.png"))
+	if (!texture3x3.loadFromFile("Resources/res/3x3.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
-	playEasy.setTexture(textureEasy);
-	playEasy.setPosition(100, 450);
+	play3x3.setTexture(texture3x3);
+	play3x3.setPosition(250, 400);
 
-	if (!textureHard.loadFromFile("Resources/res/Hard.png"))
+	if (!texture3x3_checked.loadFromFile("Resources/res/3x3 — zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
-	playHard.setTexture(textureHard);
-	playHard.setPosition(500, 450);
+
+	if (!texture5x5.loadFromFile("Resources/res/5x5.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	play5x5.setTexture(texture5x5);
+	play5x5.setPosition(520, 400);
+
+	if (!texture5x5_checked.loadFromFile("Resources/res/5x5 — zaznaczony.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
 
 
 	if (!texture_name.loadFromFile("Resources/res/Game Title.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	spriteName.setTexture(texture_name);
-	spriteName.setPosition(260, 70);
+	spriteName.setPosition(150, 60);
 
 	if (!textureBack.loadFromFile("Resources/res/Back Button.png"))
 		std::cout << "Blad ladowania textury" << std::endl;

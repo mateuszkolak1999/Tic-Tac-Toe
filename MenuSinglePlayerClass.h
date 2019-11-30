@@ -12,10 +12,12 @@ public:
 	Sprite spriteName;
 
 	//do play
-	Texture textureEasy;
-	Sprite playEasy;
-	Texture textureHard;
-	Sprite playHard;
+	Texture texture3x3;
+	Sprite play3x3;
+	Texture texture5x5;
+	Sprite play5x5;
+	Texture texture3x3_checked;
+	Texture texture5x5_checked;
 
 	//wyjscie
 	Texture textureExit;

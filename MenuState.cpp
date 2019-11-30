@@ -10,6 +10,7 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	window.draw(playSprite);
 	window.draw(multiplayerButton);
 	window.draw(settingsButton);
+	window.draw(achievementsButton);
 	window.draw(exitButton);
 
 	if (!status) {
@@ -68,6 +69,11 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 		window.draw(settingsButton);
 	}
 
+	if (achievementsButton.getGlobalBounds().contains(mouse)) {
+		achievementsButton.setTexture(textureAchievements_checked);
+		window.draw(achievementsButton);
+	}
+
 	if (exitButton.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
@@ -83,7 +89,7 @@ void MenuState::loadPlayButton() {
 	if (!texture.loadFromFile("Resources/res/Tryb jednoosobowy.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	playSprite.setTexture(texture);
-	playSprite.setPosition(320, 450);
+	playSprite.setPosition(280, 300);
 
 	if (!texture_checked.loadFromFile("Resources/res/Tryb jednoosobowy — zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
@@ -91,7 +97,7 @@ void MenuState::loadPlayButton() {
 	if (!textureMultiplayer.loadFromFile("Resources/res/Tryb wieloosobowy.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	multiplayerButton.setTexture(textureMultiplayer);
-	multiplayerButton.setPosition(320, 560);
+	multiplayerButton.setPosition(480, 400);
 
 	if (!multiplayerButton_checked.loadFromFile("Resources/res/Tryb wieloosobowy — zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
@@ -99,15 +105,23 @@ void MenuState::loadPlayButton() {
 	if (!textureSettings.loadFromFile("Resources/res/Ustawienia.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	settingsButton.setTexture(textureSettings);
-	settingsButton.setPosition(320, 670);
+	settingsButton.setPosition(280, 500);
 
 	if (!settingsButton_checked.loadFromFile("Resources/res/Ustawienia — zaznaczony.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+
+	if (!textureAchievements.loadFromFile("Resources/res/Osi¹gniêcia.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	achievementsButton.setTexture(textureAchievements);
+	achievementsButton.setPosition(480, 600);
+
+	if (!textureAchievements_checked.loadFromFile("Resources/res/Osi¹gniêcia — zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 
 	if (!texture_name.loadFromFile("Resources/res/Game Title.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	spriteName.setTexture(texture_name);
-	spriteName.setPosition(260, 70);
+	spriteName.setPosition(150, 60);
 
 }
 
