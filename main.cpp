@@ -62,11 +62,23 @@ int main()
 				break;
 			case STATE_GAME:
 				STATE = engine.game.game(window, event, Vector2f(vec));
+				if (engine.menu.status)
+					engine.music.musicValueQuietly();
+				else
+					engine.music.musicValueLoudly();
 				break;
 			case STATE_GAME_HARD:
+				if (engine.menu.status)
+					engine.music.musicValueQuietly();
+				else
+					engine.music.musicValueLoudly();
 				break;
 			case STATE_GAME_MULTIPLAYER_OFFLINE:
 				STATE = engine.game.gameMultiplayerOffline(window, event, Vector2f(vec));
+				if (engine.menu.status)
+					engine.music.musicValueQuietly();
+				else
+					engine.music.musicValueLoudly();
 				break;
 			case STATE_PAUSE:
 				STATE = engine.pause.pause(window, event, Vector2f(vec));
