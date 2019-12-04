@@ -50,23 +50,23 @@ int main()
 		switch (STATE)
 		{
 			case STATE_MENU:
-			{
+				engine.game.doItOnce();
 				STATE = engine.menu.play(window, event, Vector2f(vec));
 				if (engine.menu.status)
 					engine.music.musicValueQuietly();
 				else
 					engine.music.musicValueLoudly();
 				break;
-			}
 			case STATE_MENU_SINGLEPLAYER:
 				STATE = engine.menuSinglePlayer.play(window, event, Vector2f(vec));
 				break;
 			case STATE_GAME:
-			{
 				STATE = engine.game.game(window, event, Vector2f(vec));
 				break;
-			}
 			case STATE_GAME_HARD:
+				break;
+			case STATE_GAME_MULTIPLAYER_OFFLINE:
+				STATE = engine.game.gameMultiplayerOffline(window, event, Vector2f(vec));
 				break;
 			case STATE_PAUSE:
 				STATE = engine.pause.pause(window, event, Vector2f(vec));

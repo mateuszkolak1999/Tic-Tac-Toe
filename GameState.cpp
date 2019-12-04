@@ -150,6 +150,56 @@ void GameState::playerFunction(Event& event, Vector2f mouse, int length, int wid
 	}
 }
 
+void GameState::playerFunctionPlayerOne(Event& event, Vector2f mouse, int length, int width) {
+
+	Vector2u tempSpriteSize = krzyzyk.getTexture()->getSize();
+
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.board[i][j].getField().getGlobalBounds().contains(mouse)) {
+				if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+					if (board.board[i][j].getStatus() == PUSTE_POLE) {
+						a = i;
+						b = j;
+						x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
+						y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+						board.board[a][b].setStatus(KRZYZYK);
+						krzyzyk.setPosition(x, y);
+						music.playKrzyzykMusic();
+						max--;
+						opponent = true;
+					}
+				}
+			}
+		}
+	}
+}
+
+void GameState::playerFunctionPlayerTwo(Event& event, Vector2f mouse, int length, int width) {
+
+	Vector2u tempSpriteSize = kolko.getTexture()->getSize();
+
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.board[i][j].getField().getGlobalBounds().contains(mouse)) {
+				if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+					if (board.board[i][j].getStatus() == PUSTE_POLE) {
+						a = i;
+						b = j;
+						x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
+						y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+						board.board[a][b].setStatus(KOLKO);
+						kolko.setPosition(x, y);
+						music.playKrzyzykMusic();
+						max--;
+						opponent = false;
+					}
+				}
+			}
+		}
+	}
+}
+
 int GameState::checkWin(RenderWindow& window) {
 
 	//wygrana krzyzyka
@@ -233,13 +283,13 @@ int GameState::checkWin(RenderWindow& window) {
 		std::cout << "Wygralem" << std::endl;
 		return KRZYZYK;
 	}
-	else if (board.board[0][2].getStatus() == KRZYZYK && board.board[1][2].getStatus() == KRZYZYK && board.board[2][2].getStatus() == KRZYZYK) {
-		x = board.board[0][2].getField().getPosition().x - 7;
-		y = board.board[0][2].getField().getPosition().y - 7;
+	else if (board.board[2][0].getStatus() == KRZYZYK && board.board[2][1].getStatus() == KRZYZYK && board.board[2][2].getStatus() == KRZYZYK) {
+		x = board.board[2][0].getField().getPosition().x - 7;
+		y = board.board[2][0].getField().getPosition().y - 7;
 		krzyzykWin[0].setPosition(x, y);
 
-		x = board.board[1][2].getField().getPosition().x - 7;
-		y = board.board[1][2].getField().getPosition().y - 7;
+		x = board.board[2][1].getField().getPosition().x - 7;
+		y = board.board[2][1].getField().getPosition().y - 7;
 		krzyzykWin[1].setPosition(x, y);
 
 		x = board.board[2][2].getField().getPosition().x - 7;
@@ -433,17 +483,17 @@ int GameState::checkWin(RenderWindow& window) {
 		std::cout << "przegralem" << std::endl;
 		return KOLKO;
 	}
-	else if (board.board[1][0].getStatus() == KOLKO && board.board[1][1].getStatus() == KOLKO && board.board[1][2].getStatus() == KOLKO) {
-		x = board.board[1][0].getField().getPosition().x - 7;
-		y = board.board[1][0].getField().getPosition().y - 7;
+	else if (board.board[0][2].getStatus() == KOLKO && board.board[1][2].getStatus() == KOLKO && board.board[2][2].getStatus() == KOLKO) {
+		x = board.board[0][2].getField().getPosition().x - 7;
+		y = board.board[0][2].getField().getPosition().y - 7;
 		kolkoWin[0].setPosition(x, y);
-
-		x = board.board[1][1].getField().getPosition().x - 7;
-		y = board.board[1][1].getField().getPosition().y - 7;
-		kolkoWin[1].setPosition(x, y);
 
 		x = board.board[1][2].getField().getPosition().x - 7;
 		y = board.board[1][2].getField().getPosition().y - 7;
+		kolkoWin[1].setPosition(x, y);
+
+		x = board.board[2][2].getField().getPosition().x - 7;
+		y = board.board[2][2].getField().getPosition().y - 7;
 		kolkoWin[2].setPosition(x, y);
 
 		for (int i = 0; i < 3; i++)
@@ -528,4 +578,58 @@ int GameState::game(RenderWindow& window, Event& event, Vector2f mouse) {
 		}
 
 		return pauseButton(mouse, event);
+}
+
+int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector2f mouse) {
+	gameload(window, event);
+	playerFunctionPlayerOne(event, mouse, 3, 3);
+	drawKrzyzykAndKolko(window, 3, 3);
+
+	if (max == 0) {
+		if (checkWin(window) == KRZYZYK) {
+			std::cout << "WYGRANA KZYZYKA" << std::endl;
+			max = 9;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_WIN;
+		}
+		else if (checkWin(window) == KOLKO) {
+			max = 9;
+			std::cout << "WYGRANA KOLKA" << std::endl;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_LOSE;
+		}
+		else {
+			std::cout << "REMIS" << std::endl;
+			music.playLostMusic();
+			waiting(1);
+			return STATE_REMIS;
+		}
+	}
+	else {
+		if (opponent)
+		{
+			playerFunctionPlayerTwo(event, mouse, 3, 3);
+			opponent = false;
+		}
+
+		if (checkWin(window) == KRZYZYK) {
+			std::cout << "WYGRANA KRZYZYKA" << std::endl;
+			max = 9;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_WIN;
+		}
+
+		if (checkWin(window) == KOLKO) {
+			max = 9;
+			std::cout << "WYGRANA KOLKA" << std::endl;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_LOSE;
+		}
+	}
+
+	return pauseButton(mouse, event);
 }

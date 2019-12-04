@@ -26,8 +26,11 @@ private:
 	void drawKrzyzykAndKolko(RenderWindow& window, int length, int width);
 	void AIFunction(int length, int width);
 	void playerFunction(Event& event, Vector2f mouse, int length, int width);
+	void playerFunctionPlayerOne(Event& event, Vector2f mouse, int length, int width);
+	void playerFunctionPlayerTwo(Event& event, Vector2f mouse, int length, int width);
 	int checkWin(RenderWindow& window);
 	void loadBackground();
+	
 
 	//textura kolka i krzyzyka i background
 	Texture textureKolko;
@@ -47,6 +50,7 @@ private:
 	bool AI = false;				//komputer
 	float x;						//zmienne do rysowania krzyzyka
 	float y;
+	bool opponent = false;			//false - krzyzyk, true - kolko (w grze multiplayer)
 
 	int a;			//zmienne do statusu na polu
 	int b;
@@ -59,8 +63,9 @@ private:
 	MusicClass music;
 
 public:
-	Board board;
+	Board board;			//plnsza do gry
 	void doItOnce();		//metoda pozwalajaca zainicjowac ca³¹ tablice
 	int game(RenderWindow& window, Event& event, Vector2f mouse);
+	int gameMultiplayerOffline(RenderWindow& window, Event& event, Vector2f mouse);
 };
 
