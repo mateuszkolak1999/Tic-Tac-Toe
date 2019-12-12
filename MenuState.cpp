@@ -45,7 +45,6 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 		window.draw(playSprite);
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
-				std::cout << STATE << std::endl;
 				std::cout << "Wcisnalem singleplayer" << std::endl;
 				return STATE_MENU_SINGLEPLAYER;
 			}
@@ -57,7 +56,6 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 		window.draw(multiplayerButton);
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
-				std::cout << STATE << std::endl;
 				std::cout << "Wcisnalem gra multiplayer" << std::endl;
 				return STATE_GAME_MULTIPLAYER_OFFLINE;
 			}

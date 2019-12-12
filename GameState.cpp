@@ -173,7 +173,6 @@ void GameState::playerFunctionMultiplayer(Event& event, Vector2f mouse, int leng
 							kolko.setPosition(x, y);
 							music.playKrzyzykMusic();
 							opponent = false;
-							std::cout << "Teraz ma byc krzyzyk: " << std::endl;
 						}
 						else {
 							tempSpriteSize = krzyzyk.getTexture()->getSize();
@@ -185,7 +184,6 @@ void GameState::playerFunctionMultiplayer(Event& event, Vector2f mouse, int leng
 							krzyzyk.setPosition(x, y);
 							music.playKrzyzykMusic();
 							opponent = true;
-							std::cout << "Teraz ma byc kolko: " << std::endl;
 						}
 						max--;
 					}
