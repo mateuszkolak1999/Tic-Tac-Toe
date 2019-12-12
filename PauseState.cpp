@@ -1,6 +1,6 @@
 #include "PauseState.h"
 
-int PauseState::pause(RenderWindow& window, Event& event, Vector2f mouse) {
+int PauseState::pause(RenderWindow& window, Event& event, Vector2f mouse, int state) {
 	if (!texture.loadFromFile("Resources/res/Resume Button.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 
@@ -18,7 +18,7 @@ int PauseState::pause(RenderWindow& window, Event& event, Vector2f mouse) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << "Wcisnalem start" << std::endl;
-				return STATE_GAME;
+				return state;
 			}
 		}
 	}

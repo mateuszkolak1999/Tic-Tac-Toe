@@ -29,9 +29,11 @@ private:
 	void loadBackground(RenderWindow& window);
 	void loadRemisGraphics(RenderWindow& window);
 
+	int state;
+
 public:
-	int lose(RenderWindow& window, Event& event, Vector2f mouse);
-	int win(RenderWindow& window, Event& event, Vector2f mouse);
-	int remis(RenderWindow& window, Event& event, Vector2f mouse);
+	int lose(RenderWindow& window, Event& event, Vector2f mouse, int state);
+	int win(RenderWindow& window, Event& event, Vector2f mouse, int state);
+	int remis(RenderWindow& window, Event& event, Vector2f mouse, int state);
 };
 

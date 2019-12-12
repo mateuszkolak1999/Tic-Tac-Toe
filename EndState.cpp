@@ -67,7 +67,7 @@ void EndState::loadRemisGraphics(RenderWindow& window) {
 	window.draw(winKolko);
 }
 
-int EndState::lose(RenderWindow& window, Event& event, Vector2f mouse) {
+int EndState::lose(RenderWindow& window, Event& event, Vector2f mouse, int state) {
 	
 	loadBackground(window);
 	retryLoad(window);
@@ -78,7 +78,7 @@ int EndState::lose(RenderWindow& window, Event& event, Vector2f mouse) {
 	if (retryButton.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
-				return STATE_GAME;
+				return state;
 			}
 		}
 	}
@@ -103,7 +103,7 @@ int EndState::lose(RenderWindow& window, Event& event, Vector2f mouse) {
 	return STATE_LOSE;
 }
 
-int EndState::win(RenderWindow& window, Event& event, Vector2f mouse) {
+int EndState::win(RenderWindow& window, Event& event, Vector2f mouse, int state) {
 
 	loadBackground(window);
 	retryLoad(window);
@@ -114,7 +114,7 @@ int EndState::win(RenderWindow& window, Event& event, Vector2f mouse) {
 	if (retryButton.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
-				return STATE_GAME;
+				return state;
 			}
 		}
 	}
@@ -139,7 +139,7 @@ int EndState::win(RenderWindow& window, Event& event, Vector2f mouse) {
 	return STATE_WIN;
 }
 
-int EndState::remis(RenderWindow& window, Event& event, Vector2f mouse) {
+int EndState::remis(RenderWindow& window, Event& event, Vector2f mouse, int state) {
 
 	loadBackground(window);
 	retryLoad(window);
@@ -150,7 +150,7 @@ int EndState::remis(RenderWindow& window, Event& event, Vector2f mouse) {
 	if (retryButton.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
-				return STATE_GAME;
+				return state;
 			}
 		}
 	}

@@ -40,7 +40,7 @@ void GameState::drawPause(RenderWindow& window) {
 	window.draw(pause);
 }
 
-int GameState::pauseButton(Vector2f mouse, Event& event) {
+int GameState::pauseButton(Vector2f mouse, Event& event, int state) {
 	if (pause.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
@@ -49,7 +49,7 @@ int GameState::pauseButton(Vector2f mouse, Event& event) {
 			}
 		}
 	}
-	return STATE_GAME;
+	return state;
 }
 
 void GameState::loadBackground() {
@@ -150,34 +150,9 @@ void GameState::playerFunction(Event& event, Vector2f mouse, int length, int wid
 	}
 }
 
-void GameState::playerFunctionPlayerOne(Event& event, Vector2f mouse, int length, int width) {
+void GameState::playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width) {
 
-	Vector2u tempSpriteSize = krzyzyk.getTexture()->getSize();
-
-	for (int i = 0; i < length; i++) {
-		for (int j = 0; j < width; j++) {
-			if (board.board[i][j].getField().getGlobalBounds().contains(mouse)) {
-				if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-					if (board.board[i][j].getStatus() == PUSTE_POLE) {
-						a = i;
-						b = j;
-						x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-						y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-						board.board[a][b].setStatus(KRZYZYK);
-						krzyzyk.setPosition(x, y);
-						music.playKrzyzykMusic();
-						max--;
-						opponent = true;
-					}
-				}
-			}
-		}
-	}
-}
-
-void GameState::playerFunctionPlayerTwo(Event& event, Vector2f mouse, int length, int width) {
-
-	Vector2u tempSpriteSize = kolko.getTexture()->getSize();
+	Vector2u tempSpriteSize;
 
 	for (int i = 0; i < length; i++) {
 		for (int j = 0; j < width; j++) {
@@ -188,11 +163,31 @@ void GameState::playerFunctionPlayerTwo(Event& event, Vector2f mouse, int length
 						b = j;
 						x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
 						y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-						board.board[a][b].setStatus(KOLKO);
-						kolko.setPosition(x, y);
-						music.playKrzyzykMusic();
+						if (opponent) {
+							tempSpriteSize = kolko.getTexture()->getSize();
+							a = i;
+							b = j;
+							x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
+							y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+							board.board[a][b].setStatus(KOLKO);
+							kolko.setPosition(x, y);
+							music.playKrzyzykMusic();
+							opponent = false;
+							std::cout << "Teraz ma byc krzyzyk: " << std::endl;
+						}
+						else {
+							tempSpriteSize = krzyzyk.getTexture()->getSize();
+							a = i;
+							b = j;
+							x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
+							y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+							board.board[a][b].setStatus(KRZYZYK);
+							krzyzyk.setPosition(x, y);
+							music.playKrzyzykMusic();
+							opponent = true;
+							std::cout << "Teraz ma byc kolko: " << std::endl;
+						}
 						max--;
-						opponent = false;
 					}
 				}
 			}
@@ -577,12 +572,12 @@ int GameState::game(RenderWindow& window, Event& event, Vector2f mouse) {
 			}
 		}
 
-		return pauseButton(mouse, event);
+		return pauseButton(mouse, event, STATE_GAME);
 }
 
 int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector2f mouse) {
 	gameload(window, event);
-	playerFunctionPlayerOne(event, mouse, 3, 3);
+	playerFunctionMultiplayer(event, mouse, 3, 3);
 	drawKrzyzykAndKolko(window, 3, 3);
 
 	if (max == 0) {
@@ -608,11 +603,6 @@ int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector
 		}
 	}
 	else {
-		if (opponent)
-		{
-			playerFunctionPlayerTwo(event, mouse, 3, 3);
-			opponent = false;
-		}
 
 		if (checkWin(window) == KRZYZYK) {
 			std::cout << "WYGRANA KRZYZYKA" << std::endl;
@@ -631,5 +621,5 @@ int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector
 		}
 	}
 
-	return pauseButton(mouse, event);
+	return pauseButton(mouse, event,STATE_GAME_MULTIPLAYER_OFFLINE);
 }

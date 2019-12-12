@@ -20,14 +20,13 @@ private:
 	void setTextureKolkoWin();
 	void setTextureKrzyzykWin();
 	void drawPause(RenderWindow& window);
-	int pauseButton(Vector2f mouse, Event& event);
+	int pauseButton(Vector2f mouse, Event& event, int state);
 	void waiting(int liczba_sekund);
 	void gameload(RenderWindow& window, Event& event);
 	void drawKrzyzykAndKolko(RenderWindow& window, int length, int width);
 	void AIFunction(int length, int width);
 	void playerFunction(Event& event, Vector2f mouse, int length, int width);
-	void playerFunctionPlayerOne(Event& event, Vector2f mouse, int length, int width);
-	void playerFunctionPlayerTwo(Event& event, Vector2f mouse, int length, int width);
+	void playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width);
 	int checkWin(RenderWindow& window);
 	void loadBackground();
 	
@@ -50,7 +49,7 @@ private:
 	bool AI = false;				//komputer
 	float x;						//zmienne do rysowania krzyzyka
 	float y;
-	bool opponent = false;			//false - krzyzyk, true - kolko (w grze multiplayer)
+	bool opponent;			//false - krzyzyk, true - kolko (w grze multiplayer)
 
 	int a;			//zmienne do statusu na polu
 	int b;
