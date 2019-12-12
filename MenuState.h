@@ -12,9 +12,25 @@ public:
 	Texture texture_name;
 	Sprite spriteName;
 
-	//do play
+	//tryb jednoosobowy
 	Texture texture;
 	Sprite playSprite;
+	Texture texture_checked;
+
+	//tryb wieloosobowy
+	Texture textureMultiplayer;
+	Sprite multiplayerButton;
+	Texture multiplayerButton_checked;
+
+	//ustawienia
+	Texture textureSettings;
+	Sprite settingsButton;
+	Texture settingsButton_checked;
+
+	//osi¹gniêcia
+	Texture textureAchievements;
+	Sprite achievementsButton;
+	Texture textureAchievements_checked;
 
 	//wyjscie
 	Texture textureExit;
@@ -29,6 +45,7 @@ public:
 	Texture textureVolumeButtonOff;
 	Sprite volumeButton;
 	bool status = false;
+	bool checker = true;
 
 	void loadPlayButton();
 	void loadExitButton();

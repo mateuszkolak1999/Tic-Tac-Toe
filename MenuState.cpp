@@ -8,6 +8,9 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	window.draw(background);
 	window.draw(spriteName);
 	window.draw(playSprite);
+	window.draw(multiplayerButton);
+	window.draw(settingsButton);
+	window.draw(achievementsButton);
 	window.draw(exitButton);
 
 	if (!status) {
@@ -22,23 +25,53 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 
 	if (volumeButton.getGlobalBounds().contains(mouse)) {
 		if (event.type == Event::MouseButtonPressed) {
-			if (event.mouseButton.button == Mouse::Left) {
-				if (!status)
-					status = true;
-				else 
-					status = false;
+			if (checker) {
+				if (event.mouseButton.button == Mouse::Left) {
+					checker = false;
+					if (!status)
+						status = true;
+					else
+						status = false;
+				}
 			}
+		}
+		else {
+			checker = true;
 		}
 	}
 
 	if (playSprite.getGlobalBounds().contains(mouse)) {
+		playSprite.setTexture(texture_checked);
+		window.draw(playSprite);
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << STATE << std::endl;
-				std::cout << "Wcisnalem start" << std::endl;
-				return STATE_GAME;
+				std::cout << "Wcisnalem singleplayer" << std::endl;
+				return STATE_MENU_SINGLEPLAYER;
 			}
 		}
+	}
+
+	if (multiplayerButton.getGlobalBounds().contains(mouse)) {
+		multiplayerButton.setTexture(multiplayerButton_checked);
+		window.draw(multiplayerButton);
+		if (event.type == Event::MouseButtonPressed) {
+			if (event.mouseButton.button == Mouse::Left) {
+				std::cout << STATE << std::endl;
+				std::cout << "Wcisnalem gra multiplayer" << std::endl;
+				return STATE_GAME_MULTIPLAYER_OFFLINE;
+			}
+		}
+	}
+
+	if (settingsButton.getGlobalBounds().contains(mouse)) {
+		settingsButton.setTexture(settingsButton_checked);
+		window.draw(settingsButton);
+	}
+
+	if (achievementsButton.getGlobalBounds().contains(mouse)) {
+		achievementsButton.setTexture(textureAchievements_checked);
+		window.draw(achievementsButton);
 	}
 
 	if (exitButton.getGlobalBounds().contains(mouse)) {
@@ -53,16 +86,42 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 }
 
 void MenuState::loadPlayButton() {
-	if (!texture.loadFromFile("Resources/res/Play Button.png"))
+	if (!texture.loadFromFile("Resources/res/Tryb jednoosobowy.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	playSprite.setTexture(texture);
-	playSprite.setPosition(375, 450);
+	playSprite.setPosition(280, 300);
 
+	if (!texture_checked.loadFromFile("Resources/res/Tryb jednoosobowy — zaznaczony.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+
+	if (!textureMultiplayer.loadFromFile("Resources/res/Tryb wieloosobowy.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	multiplayerButton.setTexture(textureMultiplayer);
+	multiplayerButton.setPosition(480, 400);
+
+	if (!multiplayerButton_checked.loadFromFile("Resources/res/Tryb wieloosobowy — zaznaczony.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+
+	if (!textureSettings.loadFromFile("Resources/res/Ustawienia.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	settingsButton.setTexture(textureSettings);
+	settingsButton.setPosition(280, 500);
+
+	if (!settingsButton_checked.loadFromFile("Resources/res/Ustawienia — zaznaczony.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+
+	if (!textureAchievements.loadFromFile("Resources/res/Osi¹gniêcia.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	achievementsButton.setTexture(textureAchievements);
+	achievementsButton.setPosition(480, 600);
+
+	if (!textureAchievements_checked.loadFromFile("Resources/res/Osi¹gniêcia — zaznaczony.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
 
 	if (!texture_name.loadFromFile("Resources/res/Game Title.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	spriteName.setTexture(texture_name);
-	spriteName.setPosition(260, 70);
+	spriteName.setPosition(150, 60);
 
 }
 

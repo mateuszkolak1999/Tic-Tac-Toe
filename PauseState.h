@@ -12,7 +12,8 @@ public:
 	
 	Texture texture_background;
 	Sprite background;
+	int state;
 
-	int pause(RenderWindow& window, Event& event, Vector2f mouse);
+	int pause(RenderWindow& window, Event& event, Vector2f mouse, int state);
 };
 
