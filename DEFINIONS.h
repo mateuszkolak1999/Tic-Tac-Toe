@@ -5,7 +5,7 @@
 #define STATE_MENU 0
 #define STATE_MENU_SINGLEPLAYER 1
 #define STATE_GAME 2
-#define STATE_GAME_HARD 3
+#define STATE_GAME_5x5 3
 #define STATE_GAME_MULTIPLAYER_OFFLINE 4
 #define STATE_PAUSE 5
 #define STATE_PLAYAGAIN 6
@@ -21,6 +21,9 @@
 
 #define BOARD_MARGIN_X 230
 #define BOARD_MARGIN_Y 200
+
+#define BOARD_MARGIN_X_5x5 50
+#define BOARD_MARGIN_Y_5x5 50
 
 #define KRZYZYK 2
 #define KOLKO 1

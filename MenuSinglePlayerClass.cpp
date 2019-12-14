@@ -30,7 +30,7 @@ int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mou
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << STATE << std::endl;
 				std::cout << "Wcisnalem tryb 5x5" << std::endl;
-				return STATE_GAME_HARD;
+				return STATE_GAME_5x5;
 			}
 		}
 	}

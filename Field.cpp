@@ -9,7 +9,7 @@ Field::Field(int X, int Y, int marginX, int marginY) {
 	//ustawianie pola
 	field.setFillColor(Color::Transparent);
 	field.setSize(Vector2f(size,size));
-	field.setPosition(marginX + X * (size + 14), marginY + Y * (size + 14));
+	field.setPosition((float)marginX + X * (size + 14),(float) marginY + Y * (size + 14));
 
 }
 

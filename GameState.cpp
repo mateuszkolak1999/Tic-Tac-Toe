@@ -62,7 +62,18 @@ void GameState::loadBackground() {
 void GameState::gameload(RenderWindow& window, Event &event) {
 	loadBackground();
 	window.draw(background);
-	board.drawBoard(window,3,3);
+	board.drawBoard(window,3,3, false);
+	drawPause(window);
+	setTextureKrzyzyk();
+	setTextureKolko();
+	setTextureKolkoWin();
+	setTextureKrzyzykWin();
+}
+
+void GameState::gameload5x5(RenderWindow& window, Event& event) {
+	loadBackground();
+	window.draw(background);
+	board.drawBoard(window, 5, 5, true);
 	drawPause(window);
 	setTextureKrzyzyk();
 	setTextureKolko();
@@ -72,7 +83,12 @@ void GameState::gameload(RenderWindow& window, Event &event) {
 
 void GameState::doItOnce()
 {
-	board.loadBoard(3,3);
+	board.loadBoard(3,3, BOARD_MARGIN_X, BOARD_MARGIN_Y, false);
+}
+
+void GameState::doItOnce5x5()
+{
+	board.loadBoard(5, 5, BOARD_MARGIN_X_5x5, BOARD_MARGIN_Y_5x5, true);
 }
 
 void GameState::waiting(int liczba_sekund)
@@ -82,34 +98,58 @@ void GameState::waiting(int liczba_sekund)
 	while (clock() < a) {}
 }
 
-void GameState::drawKrzyzykAndKolko(RenderWindow& window, int length, int width) {
+void GameState::drawKrzyzykAndKolko(RenderWindow& window, int length, int width, bool table5x5) {
 
 	Vector2u tempSpriteSize = krzyzyk.getTexture()->getSize();
+
+if(!table5x5)
 	for (int i = 0; i < length; i++)
 	{
 		for (int j = 0; j < width; j++)
 		{
 			if (board.board[i][j].getStatus() == KRZYZYK)
 			{
-				x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-				y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-				krzyzyk.setPosition(x, y);
-				window.draw(krzyzyk);
+					x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
+					y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+					krzyzyk.setPosition(x, y);
+					window.draw(krzyzyk);
 			}
 			if (board.board[i][j].getStatus() == KOLKO)
 			{
-				x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-				y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-				kolko.setPosition(x, y);
-				window.draw(kolko);
+					x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
+					y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+					kolko.setPosition(x, y);
+					window.draw(kolko);
+			}
+		}
+	}
+else
+	for (int i = 0; i < length; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			if (board.board5x5[i][j].getStatus() == KRZYZYK)
+			{
+					x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
+					y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
+					krzyzyk.setPosition(x, y);
+					window.draw(krzyzyk);
+			}
+			if (board.board5x5[i][j].getStatus() == KOLKO)
+			{
+					x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
+					y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
+					kolko.setPosition(x, y);
+					window.draw(kolko);
 			}
 		}
 	}
 }
 
-void GameState::AIFunction(int length, int width) {
+void GameState::AIFunction(int length, int width, bool table5x5) {
 	srand(time(NULL));
-
+	
+	if(!table5x5)
 		while(true){
 			x_rand = rand() % length;
 			y_rand = rand() % width;
@@ -123,31 +163,67 @@ void GameState::AIFunction(int length, int width) {
 				break;
 			}
 		}
+	else
+		while (true) {
+			x_rand = rand() % length;
+			y_rand = rand() % width;
+
+			if (board.board5x5[x_rand][y_rand].getStatus() == KRZYZYK || board.board5x5[x_rand][y_rand].getStatus() == KOLKO)
+				continue;
+			else {
+				board.board5x5[x_rand][y_rand].setStatus(KOLKO);
+				std::cout << "x: " << x_rand << " y: " << y_rand << std::endl;
+				max5x5--;
+				break;
+			}
+		}
 }
 
-void GameState::playerFunction(Event& event, Vector2f mouse, int length, int width) {
+void GameState::playerFunction(Event& event, Vector2f mouse, int length, int width, bool table5x5) {
 
 	Vector2u tempSpriteSize = krzyzyk.getTexture()->getSize();
 
+if(!table5x5)
 	for (int i = 0; i < length; i++) {
 		for (int j = 0; j < width; j++) {
 			if (board.board[i][j].getField().getGlobalBounds().contains(mouse)) {
 				if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
 					if (board.board[i][j].getStatus() == PUSTE_POLE) {
-						a = i;
-						b = j;
-						x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-						y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-						board.board[a][b].setStatus(KRZYZYK);
-						krzyzyk.setPosition(x, y);
-						music.playKrzyzykMusic();
-						max--;
-						AI = true;
+							a = i;
+							b = j;
+							x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
+							y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+							board.board[a][b].setStatus(KRZYZYK);
+							krzyzyk.setPosition(x, y);
+							music.playKrzyzykMusic();
+							max--;
+							AI = true;
 					}
 				}
 			}
 		}
 	}
+else
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.board5x5[i][j].getField().getGlobalBounds().contains(mouse)) {
+				if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+					if (board.board5x5[i][j].getStatus() == PUSTE_POLE) {
+							a = i;
+							b = j;
+							x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
+							y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
+							board.board5x5[a][b].setStatus(KRZYZYK);
+							krzyzyk.setPosition(x, y);
+							music.playKrzyzykMusic();
+							max5x5--;
+							AI = true;
+					}
+				}
+			}
+		}
+	}
+
 }
 
 void GameState::playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width) {
@@ -522,8 +598,8 @@ int GameState::checkWin(RenderWindow& window) {
 
 int GameState::game(RenderWindow& window, Event& event, Vector2f mouse) {
 		gameload(window, event);
-		playerFunction(event, mouse,3,3);
-		drawKrzyzykAndKolko(window,3,3);
+		playerFunction(event, mouse,3,3, false);
+		drawKrzyzykAndKolko(window,3,3, false);
 
 		if (max == 0) {
 			if (checkWin(window) == KRZYZYK) {
@@ -541,6 +617,7 @@ int GameState::game(RenderWindow& window, Event& event, Vector2f mouse) {
 			}
 			else {
 				std::cout << "REMIS" << std::endl;
+				max = 9;
 				music.playLostMusic();
 				waiting(1);
 				return STATE_REMIS;
@@ -549,7 +626,7 @@ int GameState::game(RenderWindow& window, Event& event, Vector2f mouse) {
 		else {
 			if (AI)
 			{
-				AIFunction(3, 3);
+				AIFunction(3, 3, false);
 				AI = false;
 			}
 
@@ -573,10 +650,65 @@ int GameState::game(RenderWindow& window, Event& event, Vector2f mouse) {
 		return pauseButton(mouse, event, STATE_GAME);
 }
 
+int GameState::game5x5(RenderWindow& window, Event& event, Vector2f mouse) {
+	gameload5x5(window, event);
+	playerFunction(event, mouse, 5, 5, true);
+	drawKrzyzykAndKolko(window, 5, 5, true);
+
+	if (max5x5 == 0) {
+		if (checkWin(window) == KRZYZYK) {
+			std::cout << "WYGRANA" << std::endl;
+			max5x5 = 25;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_WIN;
+		}
+		else if (checkWin(window) == KOLKO) {
+			max5x5 = 25;
+			std::cout << "PRZEGRANA" << std::endl;
+			music.playLostMusic();
+			waiting(1);
+			return STATE_LOSE;
+		}
+		else {
+			std::cout << "REMIS" << std::endl;
+			max5x5 = 25;
+			music.playLostMusic();
+			waiting(1);
+			return STATE_REMIS;
+		}
+	}
+	else {
+		if (AI)
+		{
+			AIFunction(5, 5, true);
+			AI = false;
+		}
+
+		if (checkWin(window) == KRZYZYK) {
+			std::cout << "WYGRANA" << std::endl;
+			max5x5 = 25;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_WIN;
+		}
+
+		if (checkWin(window) == KOLKO) {
+			max5x5 = 25;
+			std::cout << "PRZEGRANA" << std::endl;
+			music.playLostMusic();
+			waiting(1);
+			return STATE_LOSE;
+		}
+	}
+	
+	return pauseButton(mouse, event, STATE_GAME_5x5);
+}
+
 int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector2f mouse) {
 	gameload(window, event);
 	playerFunctionMultiplayer(event, mouse, 3, 3);
-	drawKrzyzykAndKolko(window, 3, 3);
+	drawKrzyzykAndKolko(window, 3, 3, false);
 
 	if (max == 0) {
 		if (checkWin(window) == KRZYZYK) {
