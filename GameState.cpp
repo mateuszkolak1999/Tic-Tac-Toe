@@ -224,47 +224,86 @@ void GameState::playerFunction(Event& event, Vector2f mouse, int length, int wid
 		}
 }
 
-void GameState::playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width) {
+void GameState::playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width, bool table5x5) {
 
 	Vector2u tempSpriteSize;
 
-	for (int i = 0; i < length; i++) {
-		for (int j = 0; j < width; j++) {
-			if (board.board[i][j].getField().getGlobalBounds().contains(mouse)) {
-				if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-					if (board.board[i][j].getStatus() == PUSTE_POLE) {
-						a = i;
-						b = j;
-						x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-						y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-						if (opponent) {
-							tempSpriteSize = kolko.getTexture()->getSize();
+	if(!table5x5)
+		for (int i = 0; i < length; i++) {
+			for (int j = 0; j < width; j++) {
+				if (board.board[i][j].getField().getGlobalBounds().contains(mouse)) {
+					if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+						if (board.board[i][j].getStatus() == PUSTE_POLE) {
 							a = i;
 							b = j;
 							x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
 							y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-							board.board[a][b].setStatus(KOLKO);
-							kolko.setPosition(x, y);
-							music.playKrzyzykMusic();
-							opponent = false;
+							if (opponent) {
+								tempSpriteSize = kolko.getTexture()->getSize();
+								a = i;
+								b = j;
+								x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
+								y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+								board.board[a][b].setStatus(KOLKO);
+								kolko.setPosition(x, y);
+								music.playKrzyzykMusic();
+								opponent = false;
+							}
+							else {
+								tempSpriteSize = krzyzyk.getTexture()->getSize();
+								a = i;
+								b = j;
+								x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
+								y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+								board.board[a][b].setStatus(KRZYZYK);
+								krzyzyk.setPosition(x, y);
+								music.playKrzyzykMusic();
+								opponent = true;
+							}
+							max--;
 						}
-						else {
-							tempSpriteSize = krzyzyk.getTexture()->getSize();
-							a = i;
-							b = j;
-							x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-							y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-							board.board[a][b].setStatus(KRZYZYK);
-							krzyzyk.setPosition(x, y);
-							music.playKrzyzykMusic();
-							opponent = true;
-						}
-						max--;
 					}
 				}
 			}
 		}
-	}
+	else
+		for (int i = 0; i < length; i++) {
+			for (int j = 0; j < width; j++) {
+				if (board.board5x5[i][j].getField().getGlobalBounds().contains(mouse)) {
+					if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+						if (board.board5x5[i][j].getStatus() == PUSTE_POLE) {
+							a = i;
+							b = j;
+							x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
+							y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
+							if (opponent) {
+								tempSpriteSize = kolko.getTexture()->getSize();
+								a = i;
+								b = j;
+								x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
+								y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
+								board.board5x5[a][b].setStatus(KOLKO);
+								kolko.setPosition(x, y);
+								music.playKrzyzykMusic();
+								opponent = false;
+							}
+							else {
+								tempSpriteSize = krzyzyk.getTexture()->getSize();
+								a = i;
+								b = j;
+								x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
+								y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
+								board.board5x5[a][b].setStatus(KRZYZYK);
+								krzyzyk.setPosition(x, y);
+								music.playKrzyzykMusic();
+								opponent = true;
+							}
+							max5x5--;
+						}
+					}
+				}
+			}
+		}
 }
 
 int GameState::checkWin(RenderWindow& window, bool table5x5) {
@@ -873,7 +912,7 @@ int GameState::game5x5(RenderWindow& window, Event& event, Vector2f mouse) {
 
 int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector2f mouse) {
 	gameload(window, event);
-	playerFunctionMultiplayer(event, mouse, 3, 3);
+	playerFunctionMultiplayer(event, mouse, 3, 3, false);
 	drawKrzyzykAndKolko(window, 3, 3, false);
 
 	if (max == 0) {
@@ -892,6 +931,7 @@ int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector
 			return STATE_LOSE;
 		}
 		else {
+			max = 9;
 			std::cout << "REMIS" << std::endl;
 			music.playLostMusic();
 			waiting(1);
@@ -918,4 +958,54 @@ int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector
 	}
 
 	return pauseButton(mouse, event,STATE_GAME_MULTIPLAYER_OFFLINE);
+}
+
+int GameState::gameMultiplayerOffline5x5(RenderWindow& window, Event& event, Vector2f mouse) {
+	gameload5x5(window, event);
+	playerFunctionMultiplayer(event, mouse, 5, 5, true);
+	drawKrzyzykAndKolko(window, 5, 5, true);
+
+	if (max5x5 == 0) {
+		if (checkWin(window, true) == KRZYZYK) {
+			std::cout << "WYGRANA KZYZYKA" << std::endl;
+			max = 25;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_WIN;
+		}
+		else if (checkWin(window, true) == KOLKO) {
+			max = 25;
+			std::cout << "WYGRANA KOLKA" << std::endl;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_LOSE;
+		}
+		else {
+			max = 25;
+			std::cout << "REMIS" << std::endl;
+			music.playLostMusic();
+			waiting(1);
+			return STATE_REMIS;
+		}
+	}
+	else {
+
+		if (checkWin(window, true) == KRZYZYK) {
+			std::cout << "WYGRANA KRZYZYKA" << std::endl;
+			max = 25;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_WIN;
+		}
+
+		if (checkWin(window, true) == KOLKO) {
+			max = 25;
+			std::cout << "WYGRANA KOLKA" << std::endl;
+			music.playWinMusic();
+			waiting(1);
+			return STATE_LOSE;
+		}
+	}
+
+	return pauseButton(mouse, event, STATE_GAME_MULTIPLAYER_OFFLINE_5x5);
 }

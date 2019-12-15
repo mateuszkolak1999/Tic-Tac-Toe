@@ -25,7 +25,7 @@ private:
 	void drawKrzyzykAndKolko(RenderWindow& window, int length, int width, bool table5x5);
 	void AIFunction(int length, int width, bool table5x5);
 	void playerFunction(Event& event, Vector2f mouse, int length, int width, bool table5x5);
-	void playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width);
+	void playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width, bool table5x5);
 	int checkWin(RenderWindow& window, bool table5x5);
 	void loadBackground();
 	
@@ -72,5 +72,6 @@ public:
 	int game(RenderWindow& window, Event& event, Vector2f mouse);
 	int game5x5(RenderWindow& window, Event& event, Vector2f mouse);
 	int gameMultiplayerOffline(RenderWindow& window, Event& event, Vector2f mouse);
+	int gameMultiplayerOffline5x5(RenderWindow& window, Event& event, Vector2f mouse);
 };
 
