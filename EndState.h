@@ -29,7 +29,7 @@ private:
 	void loadBackground(RenderWindow& window);
 	void loadRemisGraphics(RenderWindow& window);
 
-	int state;
+	int state{ 0 };
 
 public:
 	int lose(RenderWindow& window, Event& event, Vector2f mouse, int state);
