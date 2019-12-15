@@ -64,6 +64,10 @@ int main()
 				STATE = engine.menuSinglePlayer.play(window, event, Vector2f(vec));
 				a = STATE_MENU_SINGLEPLAYER;
 				break;
+			case STATE_MENU_MULTIPLAYER:
+				STATE = engine.menuMultiPlayer.play(window, event, Vector2f(vec));
+				a = STATE_MENU_MULTIPLAYER;
+				break;
 			case STATE_GAME:
 				STATE = engine.game.game(window, event, Vector2f(vec));
 				a = STATE_GAME;
