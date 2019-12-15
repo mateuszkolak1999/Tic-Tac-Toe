@@ -26,7 +26,7 @@ private:
 	void AIFunction(int length, int width, bool table5x5);
 	void playerFunction(Event& event, Vector2f mouse, int length, int width, bool table5x5);
 	void playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width);
-	int checkWin(RenderWindow& window);
+	int checkWin(RenderWindow& window, bool table5x5);
 	void loadBackground();
 	
 	//textura pauzy
