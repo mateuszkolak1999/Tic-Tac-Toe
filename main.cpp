@@ -18,8 +18,6 @@ int main()
 	Engine engine;
 	STATE = STATE_MENU;
 	int a=STATE_MENU;
-	//engine.game.doItOnce();
-	//engine.game.doItOnce5x5();
 	engine.music.playGameMusic();
 
 
@@ -42,6 +40,14 @@ int main()
 				for (int i = 0; i < 3; i++) {
 					for (int j = 0; j < 3; j++)
 						std::cout << engine.game.board.board[j][i].getStatus();
+					std::cout << std::endl;
+				}
+				std::cout << "----------------" << std::endl;
+			}
+			if (event.type == Event::KeyPressed && event.key.code == Keyboard::S) {
+				for (int i = 0; i < 5; i++) {
+					for (int j = 0; j < 5; j++)
+						std::cout << engine.game.board.board5x5[j][i].getStatus();
 					std::cout << std::endl;
 				}
 				std::cout << "----------------" << std::endl;
