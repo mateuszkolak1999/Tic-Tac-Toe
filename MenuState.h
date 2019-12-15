@@ -7,7 +7,7 @@
 using namespace sf;
 class MenuState
 {
-public:
+private:
 	//nazwa gry
 	Texture texture_name;
 	Sprite spriteName;
@@ -51,6 +51,9 @@ public:
 	void loadExitButton();
 	void loadBackground();
 	void loadVolumeButton();
+
+public:
+	bool getStatus();
 	int play(RenderWindow& window, Event& event, Vector2f mouse);
 };
 

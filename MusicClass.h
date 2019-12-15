@@ -6,12 +6,10 @@ using namespace sf;
 class MusicClass
 {
 private:
-
 	Music gameMusicNow;
 	Music lostMusicNow;
 	Music krzyzykMusicNow;
 	Music winMusicNow;
-
 
 public:
 	void playGameMusic();

@@ -6,7 +6,7 @@
 
 class MenuSinglePlayerClass
 {
-public:
+private:
 	//nazwa gry
 	Texture texture_name;
 	Sprite spriteName;
@@ -34,6 +34,8 @@ public:
 	void loadPlayButton();
 	void loadExitButton();
 	void loadBackground();
+
+public:
 	int play(RenderWindow& window, Event& event, Vector2f mouse);
 };
 

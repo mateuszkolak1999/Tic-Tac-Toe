@@ -12,6 +12,7 @@ class GameState
 {
 private:
 
+	//metody
 	void setTexture();
 	void setTextureKolko();
 	void setTextureKrzyzyk();

@@ -1,13 +1,5 @@
 #include "Board.h"
 
-Field* Board::getBoard() {
-	return *board;
-}
-
-Field* Board::getBoard5x5() {
-	return *board5x5;
-}
-
 void Board::setBoardSprite() {
 	if (!texture.loadFromFile("Resources/res/Grid.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
@@ -65,10 +57,6 @@ void Board::drawBoard(RenderWindow &window, int length, int width, bool table5x5
 			
 }
 
-Board::Board() 
-{
-
-}
 
 Sprite Board::getBoardSprite() {
 	return boardSprite;

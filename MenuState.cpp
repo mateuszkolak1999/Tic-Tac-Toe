@@ -83,6 +83,10 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	return STATE_MENU;
 }
 
+bool MenuState::getStatus() {
+	return status;
+}
+
 void MenuState::loadPlayButton() {
 	if (!texture.loadFromFile("Resources/res/Tryb jednoosobowy.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
