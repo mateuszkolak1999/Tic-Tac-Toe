@@ -7,6 +7,7 @@
 #include "PauseState.h"
 #include "EndState.h"
 #include "SettingsState.h"
+#include "RulesState.h"
 #include "MusicClass.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -23,6 +24,7 @@ public:
 	PauseState pause;
 	EndState end;
 	SettingsState settings;
+	RulesState rules;
 	MusicClass music;
 };
 

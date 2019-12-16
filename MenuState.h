@@ -27,10 +27,10 @@ private:
 	Sprite settingsButton;
 	Texture settingsButton_checked;
 
-	//osi¹gniêcia
-	Texture textureAchievements;
-	Sprite achievementsButton;
-	Texture textureAchievements_checked;
+	//regulamin
+	Texture textureRules;
+	Sprite rulesButton;
+	Texture textureRules_checked;
 
 	//wyjscie
 	Texture textureExit;

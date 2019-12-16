@@ -9,7 +9,7 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	window.draw(playSprite);
 	window.draw(multiplayerButton);
 	window.draw(settingsButton);
-	window.draw(achievementsButton);
+	window.draw(rulesButton);
 	window.draw(exitButton);
 
 	if (playSprite.getGlobalBounds().contains(mouse)) {
@@ -45,9 +45,15 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 		}
 	}
 
-	if (achievementsButton.getGlobalBounds().contains(mouse)) {
-		achievementsButton.setTexture(textureAchievements_checked);
-		window.draw(achievementsButton);
+	if (rulesButton.getGlobalBounds().contains(mouse)) {
+		rulesButton.setTexture(textureRules_checked);
+		window.draw(rulesButton);
+		if (event.type == Event::MouseButtonPressed) {
+			if (event.mouseButton.button == Mouse::Left) {
+				std::cout << "Wcisnalem zasady gry" << std::endl;
+				return STATE_RULES;
+			}
+		}
 	}
 
 	if (exitButton.getGlobalBounds().contains(mouse)) {
@@ -86,12 +92,12 @@ void MenuState::loadPlayButton() {
 	if (!settingsButton_checked.loadFromFile("Resources/res/Ustawienia — zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 
-	if (!textureAchievements.loadFromFile("Resources/res/Osi¹gniêcia.png"))
+	if (!textureRules.loadFromFile("Resources/res/Osi¹gniêcia.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
-	achievementsButton.setTexture(textureAchievements);
-	achievementsButton.setPosition(480, 600);
+	rulesButton.setTexture(textureRules);
+	rulesButton.setPosition(480, 600);
 
-	if (!textureAchievements_checked.loadFromFile("Resources/res/Osi¹gniêcia — zaznaczony.png"))
+	if (!textureRules_checked.loadFromFile("Resources/res/Osi¹gniêcia — zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 
 	if (!texture_name.loadFromFile("Resources/res/Game Title.png"))

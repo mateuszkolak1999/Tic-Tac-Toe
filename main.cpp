@@ -186,6 +186,14 @@ int main()
 				else
 					engine.music.musicValueLoudly();
 				break;
+			case STATE_RULES:
+				STATE = engine.rules.load(window, event, Vector2f(vec));
+				a = STATE_RULES;
+				if (engine.settings.getStatus())
+					engine.music.musicValueQuietly();
+				else
+					engine.music.musicValueLoudly();
+				break;
 		}
 
 		window.display();

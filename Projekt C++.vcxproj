@@ -30,6 +30,7 @@
     <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="MusicClass.cpp" />
     <ClCompile Include="PauseState.cpp" />
+    <ClCompile Include="RulesState.cpp" />
     <ClCompile Include="SettingsState.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +45,7 @@
     <ClInclude Include="MenuState.h" />
     <ClInclude Include="MusicClass.h" />
     <ClInclude Include="PauseState.h" />
+    <ClInclude Include="RulesState.h" />
     <ClInclude Include="SettingsState.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
