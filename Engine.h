@@ -6,6 +6,7 @@
 #include "MenuMultiPlayerClass.h"
 #include "PauseState.h"
 #include "EndState.h"
+#include "SettingsState.h"
 #include "MusicClass.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -21,6 +22,7 @@ public:
 	GameState game;
 	PauseState pause;
 	EndState end;
+	SettingsState settings;
 	MusicClass music;
 };
 

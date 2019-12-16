@@ -14,6 +14,7 @@
 #define STATE_WIN 9
 #define STATE_LOSE 10
 #define STATE_REMIS 11
+#define STATE_SETTINGS 12
 
 #define BOARD_LENGTH_3 3
 #define BOARD_WIDTH_3 3

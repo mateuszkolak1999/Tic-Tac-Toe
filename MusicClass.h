@@ -19,5 +19,7 @@ public:
 	void playWinMusic();
 	void musicValueLoudly();
 	void musicValueQuietly();
+	void musicVolumeLoudyDodatkowe();
+	void musicVolumeQuietlyDodatkowe();
 };
 

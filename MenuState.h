@@ -40,20 +40,11 @@ private:
 	Texture textureBackground;
 	Sprite background;
 
-	//volue button
-	Texture textureVolumeButtonOn;
-	Texture textureVolumeButtonOff;
-	Sprite volumeButton;
-	bool status = false;
-	bool checker = true;
-
 	void loadPlayButton();
 	void loadExitButton();
 	void loadBackground();
-	void loadVolumeButton();
 
 public:
-	bool getStatus();
 	int play(RenderWindow& window, Event& event, Vector2f mouse);
 };
 

@@ -3,6 +3,7 @@
 #include "PauseState.h"
 #include "DEFINIONS.h"
 #include "MusicClass.h"
+#include "SettingsState.h"
 #include <cstdlib>
 #include <time.h>
 

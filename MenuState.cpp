@@ -4,7 +4,6 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	loadBackground();
 	loadPlayButton();
 	loadExitButton();
-	loadVolumeButton();
 	window.draw(background);
 	window.draw(spriteName);
 	window.draw(playSprite);
@@ -12,33 +11,6 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	window.draw(settingsButton);
 	window.draw(achievementsButton);
 	window.draw(exitButton);
-
-	if (!status) {
-		volumeButton.setTexture(textureVolumeButtonOn);
-		window.draw(volumeButton);
-	}
-
-	if (status) {
-		volumeButton.setTexture(textureVolumeButtonOff);
-		window.draw(volumeButton);
-	}
-
-	if (volumeButton.getGlobalBounds().contains(mouse)) {
-		if (event.type == Event::MouseButtonPressed) {
-			if (checker) {
-				if (event.mouseButton.button == Mouse::Left) {
-					checker = false;
-					if (!status)
-						status = true;
-					else
-						status = false;
-				}
-			}
-		}
-		else {
-			checker = true;
-		}
-	}
 
 	if (playSprite.getGlobalBounds().contains(mouse)) {
 		playSprite.setTexture(texture_checked);
@@ -65,6 +37,12 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	if (settingsButton.getGlobalBounds().contains(mouse)) {
 		settingsButton.setTexture(settingsButton_checked);
 		window.draw(settingsButton);
+		if (event.type == Event::MouseButtonPressed) {
+			if (event.mouseButton.button == Mouse::Left) {
+				std::cout << "Wcisnalem ustawienia" << std::endl;
+				return STATE_SETTINGS;
+			}
+		}
 	}
 
 	if (achievementsButton.getGlobalBounds().contains(mouse)) {
@@ -81,10 +59,6 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	}
 
 	return STATE_MENU;
-}
-
-bool MenuState::getStatus() {
-	return status;
 }
 
 void MenuState::loadPlayButton() {
@@ -139,12 +113,4 @@ void MenuState::loadBackground() {
 		std::cout << "Blad ladowania textury" << std::endl;
 	background.setTexture(textureBackground);
 	background.setPosition(0, 0);
-}
-
-void MenuState::loadVolumeButton() {
-	if (!textureVolumeButtonOn.loadFromFile("Resources/res/Sound On.png"))
-		std::cout << "Blad ladowania textury" << std::endl;
-	if (!textureVolumeButtonOff.loadFromFile("Resources/res/Sound Off.png"))
-		std::cout << "Blad ladowania textury" << std::endl;
-	volumeButton.setPosition(50, 750);
 }
