@@ -36,6 +36,5 @@ public:
 	void setTexture(String string);
 	void setField(RectangleShape shape);
 	void draw(RenderTarget& target, RenderStates states) const;
-
 };
 

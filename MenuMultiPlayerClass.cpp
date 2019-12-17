@@ -1,6 +1,6 @@
-#include "MenuSinglePlayerClass.h"
+#include "MenuMultiPlayerClass.h"
 
-int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mouse) {
+int MenuMultiPlayerClass::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	loadBackground();
 	loadPlayButton();
 	loadExitButton();
@@ -18,7 +18,7 @@ int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mou
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << STATE << std::endl;
 				std::cout << "Wcisnalem tryb 3x3" << std::endl;
-				return STATE_GAME;
+				return STATE_GAME_MULTIPLAYER_OFFLINE;
 			}
 		}
 	}
@@ -30,7 +30,7 @@ int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mou
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << STATE << std::endl;
 				std::cout << "Wcisnalem tryb 5x5" << std::endl;
-				return STATE_GAME_5x5;
+				return STATE_GAME_MULTIPLAYER_OFFLINE_5x5;
 			}
 		}
 	}
@@ -53,10 +53,10 @@ int MenuSinglePlayerClass::play(RenderWindow& window, Event& event, Vector2f mou
 		}
 	}
 
-	return STATE_MENU_SINGLEPLAYER;
+	return STATE_MENU_MULTIPLAYER;
 }
 
-void MenuSinglePlayerClass::loadPlayButton() {
+void MenuMultiPlayerClass::loadPlayButton() {
 	if (!texture3x3.loadFromFile("Resources/res/3x3.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	play3x3.setTexture(texture3x3);
@@ -86,14 +86,14 @@ void MenuSinglePlayerClass::loadPlayButton() {
 
 }
 
-void MenuSinglePlayerClass::loadExitButton() {
+void MenuMultiPlayerClass::loadExitButton() {
 	if (!textureExit.loadFromFile("Resources/res/Close Button.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	exitButton.setTexture(textureExit);
 	exitButton.setPosition(700, 750);
 }
 
-void MenuSinglePlayerClass::loadBackground() {
+void MenuMultiPlayerClass::loadBackground() {
 	if (!textureBackground.loadFromFile("Resources/res/Main_Menu_Background.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	background.setTexture(textureBackground);
