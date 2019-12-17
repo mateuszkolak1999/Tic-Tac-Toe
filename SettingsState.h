@@ -4,7 +4,7 @@
 #include "DEFINIONS.h"
 #include "GameState.h"
 
-class MenuSinglePlayerClass
+class SettingsState
 {
 private:
 	//nazwa gry
@@ -12,12 +12,9 @@ private:
 	Sprite spriteName;
 
 	//do play
-	Texture texture3x3;
-	Sprite play3x3;
-	Texture texture5x5;
-	Sprite play5x5;
-	Texture texture3x3_checked;
-	Texture texture5x5_checked;
+	Texture textureMusicGame;
+	Sprite musicGame;
+	Texture textureMusicGame_checked;
 
 	//wyjscie
 	Texture textureExit;
@@ -35,7 +32,11 @@ private:
 	void loadExitButton();
 	void loadBackground();
 
+	bool status{ false };		//do muzyki
+	bool checker{ true };
+
 public:
+	bool getStatus();
 	int play(RenderWindow& window, Event& event, Vector2f mouse);
 };
 

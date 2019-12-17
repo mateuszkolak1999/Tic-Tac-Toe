@@ -6,7 +6,7 @@
 using namespace sf;
 class PauseState
 {
-public:
+private:
 	Texture texture;
 	Sprite playagain;
 	
@@ -14,6 +14,7 @@ public:
 	Sprite background;
 	int state;
 
+public:
 	int pause(RenderWindow& window, Event& event, Vector2f mouse, int state);
 };
 

@@ -799,6 +799,8 @@ int GameState::checkWin(RenderWindow& window, bool table5x5) {
 				}
 			}
 	}
+
+	return PUSTE_POLE;
 }
 
 int GameState::game(RenderWindow& window, Event& event, Vector2f mouse) {

@@ -9,6 +9,7 @@
 #include "GameState.h"
 #include "PauseState.h"
 #include "MusicClass.h"
+#include "SettingsState.h"
 #include"Engine.h"
 
 int main()
@@ -18,8 +19,6 @@ int main()
 	Engine engine;
 	STATE = STATE_MENU;
 	int a=STATE_MENU;
-	//engine.game.doItOnce();
-	//engine.game.doItOnce5x5();
 	engine.music.playGameMusic();
 
 
@@ -46,6 +45,14 @@ int main()
 				}
 				std::cout << "----------------" << std::endl;
 			}
+			if (event.type == Event::KeyPressed && event.key.code == Keyboard::S) {
+				for (int i = 0; i < 5; i++) {
+					for (int j = 0; j < 5; j++)
+						std::cout << engine.game.board.board5x5[j][i].getStatus();
+					std::cout << std::endl;
+				}
+				std::cout << "----------------" << std::endl;
+			}
 		}
 	
 		window.clear();
@@ -56,7 +63,7 @@ int main()
 				engine.game.doItOnce5x5();
 				STATE = engine.menu.play(window, event, Vector2f(vec));
 				a = STATE_MENU;
-				if (engine.menu.status)
+				if (engine.settings.getStatus())
 					engine.music.musicValueQuietly();
 				else
 					engine.music.musicValueLoudly();
@@ -72,7 +79,7 @@ int main()
 			case STATE_GAME:
 				STATE = engine.game.game(window, event, Vector2f(vec));
 				a = STATE_GAME;
-				if (engine.menu.status)
+				if (engine.settings.getStatus())
 					engine.music.musicValueQuietly();
 				else
 					engine.music.musicValueLoudly();
@@ -80,7 +87,7 @@ int main()
 			case STATE_GAME_5x5:
 				STATE = engine.game.game5x5(window, event, Vector2f(vec));
 				a = STATE_GAME_5x5;
-				if (engine.menu.status)
+				if (engine.settings.getStatus())
 					engine.music.musicValueQuietly();
 				else
 					engine.music.musicValueLoudly();
@@ -88,7 +95,7 @@ int main()
 			case STATE_GAME_MULTIPLAYER_OFFLINE:
 				STATE = engine.game.gameMultiplayerOffline(window, event, Vector2f(vec));
 				a = STATE_GAME_MULTIPLAYER_OFFLINE;
-				if (engine.menu.status)
+				if (engine.settings.getStatus())
 					engine.music.musicValueQuietly();
 				else
 					engine.music.musicValueLoudly();
@@ -96,7 +103,7 @@ int main()
 			case STATE_GAME_MULTIPLAYER_OFFLINE_5x5:
 				STATE = engine.game.gameMultiplayerOffline5x5(window, event, Vector2f(vec));
 				a = STATE_GAME_MULTIPLAYER_OFFLINE_5x5;
-				if (engine.menu.status)
+				if (engine.settings.getStatus())
 					engine.music.musicValueQuietly();
 				else
 					engine.music.musicValueLoudly();
@@ -126,6 +133,10 @@ int main()
 					STATE = engine.end.win(window, event, Vector2f(vec), STATE_GAME_MULTIPLAYER_OFFLINE_5x5);
 				}
 				engine.music.playGameMusic();
+				if (engine.settings.getStatus())
+					engine.music.musicValueQuietly();
+				else
+					engine.music.musicValueLoudly();
 				break;
 			case STATE_LOSE:
 				engine.music.stopGameMusic();
@@ -166,6 +177,22 @@ int main()
 					STATE = engine.end.remis(window, event, Vector2f(vec), STATE_GAME_MULTIPLAYER_OFFLINE_5x5);
 				}
 				engine.music.playGameMusic();
+				break;
+			case STATE_SETTINGS:
+				STATE = engine.settings.play(window, event, Vector2f(vec));
+				a = STATE_SETTINGS;
+				if (engine.settings.getStatus())
+					engine.music.musicValueQuietly();
+				else
+					engine.music.musicValueLoudly();
+				break;
+			case STATE_RULES:
+				STATE = engine.rules.load(window, event, Vector2f(vec));
+				a = STATE_RULES;
+				if (engine.settings.getStatus())
+					engine.music.musicValueQuietly();
+				else
+					engine.music.musicValueLoudly();
 				break;
 		}
 

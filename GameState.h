@@ -3,6 +3,7 @@
 #include "PauseState.h"
 #include "DEFINIONS.h"
 #include "MusicClass.h"
+#include "SettingsState.h"
 #include <cstdlib>
 #include <time.h>
 
@@ -12,6 +13,7 @@ class GameState
 {
 private:
 
+	//metody
 	void setTexture();
 	void setTextureKolko();
 	void setTextureKrzyzyk();
@@ -48,17 +50,17 @@ private:
 
 	//zmienne do gry
 
-	bool check_draw = false;		//false - ruch gracza, true - ruch komputera
-	bool AI = false;				//komputer
-	float x;						//zmienne do rysowania krzyzyka
-	float y;
-	bool opponent;			//false - krzyzyk, true - kolko (w grze multiplayer)
+	bool check_draw{ false };		//false - ruch gracza, true - ruch komputera
+	bool AI{ false };				//komputer
+	float x{ 0 };						//zmienne do rysowania krzyzyka
+	float y{ 0 };
+	bool opponent{ false };			//false - krzyzyk, true - kolko (w grze multiplayer)
 
-	int a;			//zmienne do statusu na polu
-	int b;
+	int a{ 0 };			//zmienne do statusu na polu
+	int b{ 0 };
 
-	int x_rand;		//zmienne do AI
-	int y_rand;
+	int x_rand{ 0 };		//zmienne do AI
+	int y_rand{ 0 };
 
 	int max = 9;		//zmienna do liczenia ile pól jest jeszcz wolnych w grze 3x3
 	int max5x5 = 25;	//zmienna do liczenia ile pól jest jeszcz wolnych w grze 5x5

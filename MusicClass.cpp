@@ -42,3 +42,15 @@ void MusicClass::musicValueQuietly() {
 	winMusicNow.setVolume(0.f);
 	lostMusicNow.setVolume(0.f);
 }
+
+void MusicClass::musicVolumeLoudyDodatkowe() {
+	krzyzykMusicNow.setVolume(100.f);
+	winMusicNow.setVolume(100.f);
+	lostMusicNow.setVolume(100.f);
+}
+
+void MusicClass::musicVolumeQuietlyDodatkowe() {
+	krzyzykMusicNow.setVolume(0.f);
+	winMusicNow.setVolume(0.f);
+	lostMusicNow.setVolume(0.f);
+}

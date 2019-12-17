@@ -7,7 +7,7 @@
 using namespace sf;
 class MenuState
 {
-public:
+private:
 	//nazwa gry
 	Texture texture_name;
 	Sprite spriteName;
@@ -27,10 +27,10 @@ public:
 	Sprite settingsButton;
 	Texture settingsButton_checked;
 
-	//osi¹gniêcia
-	Texture textureAchievements;
-	Sprite achievementsButton;
-	Texture textureAchievements_checked;
+	//regulamin
+	Texture textureRules;
+	Sprite rulesButton;
+	Texture textureRules_checked;
 
 	//wyjscie
 	Texture textureExit;
@@ -40,17 +40,11 @@ public:
 	Texture textureBackground;
 	Sprite background;
 
-	//volue button
-	Texture textureVolumeButtonOn;
-	Texture textureVolumeButtonOff;
-	Sprite volumeButton;
-	bool status = false;
-	bool checker = true;
-
 	void loadPlayButton();
 	void loadExitButton();
 	void loadBackground();
-	void loadVolumeButton();
+
+public:
 	int play(RenderWindow& window, Event& event, Vector2f mouse);
 };
 
