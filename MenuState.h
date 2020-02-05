@@ -22,6 +22,11 @@ private:
 	Sprite multiplayerButton;
 	Texture multiplayerButton_checked;
 
+	//symulacja
+	Texture textureSymulacja;
+	Sprite symulacjaButton;
+	Texture symulacjaButton_checked;
+
 	//ustawienia
 	Texture textureSettings;
 	Sprite settingsButton;

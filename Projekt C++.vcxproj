@@ -21,12 +21,9 @@
   <ItemGroup>
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="EndState.cpp" />
-    <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Field.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MenuMultiPlayerClass.cpp" />
-    <ClCompile Include="MenuSinglePlayerClass.cpp" />
     <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="MusicClass.cpp" />
     <ClCompile Include="PauseState.cpp" />
@@ -40,8 +37,6 @@
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Field.h" />
     <ClInclude Include="GameState.h" />
-    <ClInclude Include="MenuMultiPlayerClass.h" />
-    <ClInclude Include="MenuSinglePlayerClass.h" />
     <ClInclude Include="MenuState.h" />
     <ClInclude Include="MusicClass.h" />
     <ClInclude Include="PauseState.h" />

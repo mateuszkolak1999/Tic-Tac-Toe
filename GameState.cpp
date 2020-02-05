@@ -59,35 +59,52 @@ void GameState::loadBackground() {
 	background.setPosition(0, 0);
 }
 
-void GameState::gameload(RenderWindow& window, Event &event) {
+Texture GameState::getScaledTexture(const sf::Texture& texture, Vector2f scale) {
+	return texture;
+}
+
+int GameState::getLiczba_win() {
+	return liczba_win;
+}
+
+int GameState::getLiczba_lose() {
+	return liczba_lose;
+}
+
+int GameState::getLiczba_remis() {
+	return liczba_remis;
+}
+
+void GameState::gameload(RenderWindow& window, Event &event, int numer) {
+	Board board(numer, numer);
+	tablica = board;
 	loadBackground();
 	window.draw(background);
-	board.drawBoard(window,3,3, false);
-	drawPause(window);
+	board.boardSetTexture();
+	board.drawMap(window);
 	setTextureKrzyzyk();
 	setTextureKolko();
 	setTextureKolkoWin();
 	setTextureKrzyzykWin();
+	krzyzyk.setOrigin(board.getA(), board.getA());
+	kolko.setOrigin(board.getA(), board.getA());
+	krzyzyk.setScale(float(board.getA()/160.0), float(board.getA()/160.0));
+	kolko.setScale(float(board.getA() / 160.0), float(board.getA() / 160.0));
+	newScaleKrzyzykAndKolko = krzyzyk.getScale();
+	scaleKrzyzykAndKolko = krzyzyk.getScale().x * 160;
 }
 
-void GameState::gameload5x5(RenderWindow& window, Event& event) {
+void GameState::doIt(RenderWindow& window,int numer)
+{
 	loadBackground();
 	window.draw(background);
-	board.drawBoard(window, 5, 5, true);
+	tablica.drawMap(window);
 	setTextureKrzyzyk();
 	setTextureKolko();
 	setTextureKolkoWin();
 	setTextureKrzyzykWin();
-}
-
-void GameState::doItOnce()
-{
-	board.loadBoard(3,3, BOARD_MARGIN_X, BOARD_MARGIN_Y, false);
-}
-
-void GameState::doItOnce5x5()
-{
-	board.loadBoard(5, 5, BOARD_MARGIN_X_5x5, BOARD_MARGIN_Y_5x5, true);
+	krzyzyk.setOrigin(tablica.getA(), tablica.getA());
+	kolko.setOrigin(tablica.getA(), tablica.getA());
 }
 
 void GameState::waiting(int liczba_sekund)
@@ -97,208 +114,1066 @@ void GameState::waiting(int liczba_sekund)
 	while (clock() < a) {}
 }
 
-void GameState::drawKrzyzykAndKolko(RenderWindow& window, int length, int width, bool table5x5) {
-
-	Vector2u tempSpriteSize = krzyzyk.getTexture()->getSize();
-
-if(!table5x5)
+void GameState::clearBoard(int length, int width) {
 	for (int i = 0; i < length; i++)
-	{
 		for (int j = 0; j < width; j++)
+			tablica.getBoard()[i][j].setStatus(PUSTE_POLE);
+}
+
+void GameState::drawKrzyzykAndKolko(RenderWindow& window, int length, int width) {
+
+		for (int i = 0; i < length; i++)
 		{
-			if (board.board[i][j].getStatus() == KRZYZYK)
+			for (int j = 0; j < width; j++)
 			{
-					x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-					y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+				if (tablica.getBoard()[i][j].getStatus() == KRZYZYK)
+				{
+					x = tablica.getBoard()[i][j].getField().getPosition().x - (1- newScaleKrzyzykAndKolko.x)*scaleKrzyzykAndKolko;
+					y = tablica.getBoard()[i][j].getField().getPosition().y - (1- newScaleKrzyzykAndKolko.y)*scaleKrzyzykAndKolko;
 					krzyzyk.setPosition(x, y);
 					window.draw(krzyzyk);
-			}
-			if (board.board[i][j].getStatus() == KOLKO)
-			{
-					x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-					y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
+				}
+				if (tablica.getBoard()[i][j].getStatus() == KOLKO)
+				{
+					x = tablica.getBoard()[i][j].getField().getPosition().x - (1 - newScaleKrzyzykAndKolko.x) * scaleKrzyzykAndKolko;
+					y = tablica.getBoard()[i][j].getField().getPosition().y - (1 - newScaleKrzyzykAndKolko.y) * scaleKrzyzykAndKolko;
 					kolko.setPosition(x, y);
 					window.draw(kolko);
+				}
+			}
+		}
+}
+
+void GameState::playerFunction(Event& event, Vector2f mouse, int length, int width) {
+
+		for (int i = 0; i < length; i++) {
+			for (int j = 0; j < width; j++) {
+				if (tablica.getBoard()[i][j].getField().getGlobalBounds().contains(mouse)) {
+					if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
+						if (tablica.getBoard()[i][j].getStatus() == PUSTE_POLE) {
+							a = i;
+							b = j;
+							x_temp = i;
+							y_temp = j;
+							tablica.getBoard()[a][b].setStatus(KRZYZYK);
+							music.playKrzyzykMusic();
+							AI_check = true;
+						}
+					}
+				}
+			}
+		}
+}
+
+bool GameState::checkWin(Player player,Board& board,int length, int width) {
+	int playerChar;
+	if (player == Player::HUMAN) playerChar = KRZYZYK;
+	else playerChar = KOLKO;
+
+	if (length == 3 && width == 3) {
+		for (int i = 0; i < 3; i++) {
+			// Check horizontals
+			if (board.getBoard()[i][0].getStatus() == playerChar && board.getBoard()[i][1].getStatus() == playerChar
+				&& board.getBoard()[i][2].getStatus() == playerChar)
+				return true;
+
+			// Check verticals
+			if (board.getBoard()[0][i].getStatus() == playerChar && board.getBoard()[1][i].getStatus() == playerChar
+				&& board.getBoard()[2][i].getStatus() == playerChar)
+				return true;
+		}
+
+		// Check diagonals
+		if (board.getBoard()[0][0].getStatus() == playerChar && board.getBoard()[1][1].getStatus() == playerChar
+			&& board.getBoard()[2][2].getStatus() == playerChar) {
+			return true;
+		}
+		if (board.getBoard()[0][2].getStatus() == playerChar && board.getBoard()[1][1].getStatus() == playerChar
+			&& board.getBoard()[2][0].getStatus() == playerChar) {
+			return true;
+		}
+
+		return false;
+	}
+	else if (length == 4 && width == 4) {
+		for (int i = 0; i < 4; i++) {
+			// Check horizontals
+			if (board.getBoard()[i][0].getStatus() == playerChar && board.getBoard()[i][1].getStatus() == playerChar
+				&& board.getBoard()[i][2].getStatus() == playerChar && board.getBoard()[i][3].getStatus() == playerChar)
+				return true;
+
+			// Check verticals
+			if (board.getBoard()[0][i].getStatus() == playerChar && board.getBoard()[1][i].getStatus() == playerChar
+				&& board.getBoard()[2][i].getStatus() == playerChar && board.getBoard()[3][i].getStatus() == playerChar)
+				return true;
+		}
+
+		// Check diagonals
+		if (board.getBoard()[0][0].getStatus() == playerChar && board.getBoard()[1][1].getStatus() == playerChar
+			&& board.getBoard()[2][2].getStatus() == playerChar && board.getBoard()[2][2].getStatus() == playerChar) {
+			return true;
+		}
+		if (board.getBoard()[0][3].getStatus() == playerChar && board.getBoard()[1][2].getStatus() == playerChar
+			&& board.getBoard()[2][1].getStatus() == playerChar && board.getBoard()[3][0].getStatus() == playerChar) {
+			return true;
+		}
+
+		return false;
+	}
+	else {
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < length-4; j++) {
+				// Check horizontals
+				if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i][j+1].getStatus() == playerChar
+					&& board.getBoard()[i][j+2].getStatus() == playerChar && board.getBoard()[i][j+3].getStatus() == playerChar
+					&& board.getBoard()[i][j+4].getStatus() == playerChar)
+					return true;
+
+				// Check verticals
+				if (board.getBoard()[j][i].getStatus() == playerChar && board.getBoard()[j+1][i].getStatus() == playerChar
+					&& board.getBoard()[j+2][i].getStatus() == playerChar && board.getBoard()[j+3][i].getStatus() == playerChar
+					&& board.getBoard()[j+4][i].getStatus() == playerChar)
+					return true;
+			}
+		}
+
+		for (int i = 0; i < width-4; i++) {
+			for (int j = 0; j < length-4; j++) {
+				// Check diagonals
+				if (board.getBoard()[i+4][j].getStatus() == playerChar && board.getBoard()[i+3][j+1].getStatus() == playerChar
+					&& board.getBoard()[i+2][j+2].getStatus() == playerChar && board.getBoard()[i+1][j+3].getStatus() == playerChar
+					&& board.getBoard()[i][j+4].getStatus() == playerChar) {
+					return true;
+				}
+				if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i + 1][j + 1].getStatus() == playerChar
+					&& board.getBoard()[i + 2][j + 2].getStatus() == playerChar && board.getBoard()[i + 3][j + 3].getStatus() == playerChar
+					&& board.getBoard()[i+4][j + 4].getStatus() == playerChar) {
+					return true;
+				}
 			}
 		}
 	}
-else
-	for (int i = 0; i < length; i++)
-	{
-		for (int j = 0; j < width; j++)
-		{
-			if (board.board5x5[i][j].getStatus() == KRZYZYK)
-			{
-					x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
-					y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
-					krzyzyk.setPosition(x, y);
-					window.draw(krzyzyk);
-			}
-			if (board.board5x5[i][j].getStatus() == KOLKO)
-			{
-					x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
-					y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
-					kolko.setPosition(x, y);
-					window.draw(kolko);
+	return false;
+}
+
+bool GameState::gameOver(Board& board, int length, int width) {
+	if (checkWin(Player::HUMAN,board,length,width)) return true;
+	else if (checkWin(Player::AI,board,length,width)) return true;
+
+	bool emptySpace = false;
+	if (length == 3 && width == 3) {
+		for (int i = 0; i < length; i++) {
+			if (board.getBoard()[i][0].getStatus() == PUSTE_POLE || board.getBoard()[i][1].getStatus() == PUSTE_POLE || board.getBoard()[i][2].getStatus() == PUSTE_POLE)
+				emptySpace = true;
+		}
+		return !emptySpace;
+	}
+	else if(length == 4 && width == 4){
+		for (int i = 0; i < length; i++) {
+			if (board.getBoard()[i][0].getStatus() == PUSTE_POLE || board.getBoard()[i][1].getStatus() == PUSTE_POLE || board.getBoard()[i][2].getStatus() == PUSTE_POLE || board.getBoard()[i][3].getStatus() == PUSTE_POLE)
+				emptySpace = true;
+		}
+		return !emptySpace;
+	}
+	else {
+		for (int i = 0; i < length; i++) {
+			for (int j = 0; j < width; j++) {
+				if (board.getBoard()[i][j].getStatus() == PUSTE_POLE)
+					emptySpace = true;
 			}
 		}
+		return !emptySpace;
 	}
 }
 
-void GameState::AIFunction(int length, int width, bool table5x5) {
-	srand(time(NULL));
+int GameState::score(Board& board, int length, int width) {
+	if (checkWin(Player::HUMAN,board,length,width)) { return 10; }
+	else if (checkWin(Player::AI,board,length,width)) { return -10; }
+	return 0; // draw
+}
+
+bool GameState::isMovesLeft(Board& board, int length, int width) {
+	for (int i = 0; i < length; i++)
+		for (int j = 0; j < width; j++)
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE)
+				return true;
+	return false;
+}
+
+Move GameState::minimax(Board& board,int length, int width)
+{
+	int bestMoveScore = 100; // -100 is arbitrary
+	Move bestMove;
+	bestMove.i = -1;
+	bestMove.j = -1;
+
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j].setStatus(KOLKO);
+				int tempMoveScore = maxSearch(board, length, width);
+				if (tempMoveScore <= bestMoveScore) {
+					bestMoveScore = tempMoveScore;
+					bestMove.i = i;
+					bestMove.j = j;
+				}
+				board.getBoard()[i][j].setStatus(PUSTE_POLE);
+			}
+		}
+	}
+
+	return bestMove;
+}
+
+int GameState::maxSearch(Board& board,int length,int width) {
+	if (gameOver(board,length,width)) return score(board,length,width);
+	Move bestMove;
+	bestMove.i = -1;
+	bestMove.j = -1;
+
+	int bestMoveScore = -1000;
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j].setStatus(KRZYZYK);
+				int tempMoveScore = minSearch(board, length, width);
+				if (tempMoveScore >= bestMoveScore) {
+					bestMoveScore = tempMoveScore;
+					bestMove.i = i;
+					bestMove.j = j;
+				}
+				board.getBoard()[i][j].setStatus(PUSTE_POLE);
+			}
+		}
+	}
+
+	return bestMoveScore;
+}
+
+int GameState::minSearch(Board& board, int length, int width) {
+	if (gameOver(board,length,width)) return score(board, length, width);
+	Move bestMove;
+	bestMove.i = -1;
+	bestMove.j = -1;
+
+	int bestMoveScore = 1000;
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j].setStatus(KOLKO);
+				int tempMove = maxSearch(board, length, width);
+				if (tempMove <= bestMoveScore) {
+					bestMoveScore = tempMove;
+					bestMove.i = i;
+					bestMove.j = j;
+				}
+				board.getBoard()[i][j].setStatus(PUSTE_POLE);
+			}
+		}
+	}
+
+	return bestMoveScore;
+}
+
+int GameState::MINMAX2(Board& board, int length, int width, int depth, bool isMax, int alfa, int beta) {
+	int wynik = score(board,length,width);
+
+	// If Maximizer has won the game return his/her 
+	// evaluated score 
+	if (wynik == 10)
+		return wynik;
+
+	// If Minimizer has won the game return his/her 
+	// evaluated score 
+	if (wynik == -10)
+		return wynik;
+
+	// If there are no more moves and no winner then 
+	// it is a tie 
+	if (isMovesLeft(board,length,width) == false)
+		return 0;
+
+	// If this maximizer's move 
+	if (isMax)
+	{
+		int best = -1000;
+
+		// Traverse all cells 
+		for (int i = 0; i < length; i++)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				// Check if cell is empty 
+				if (board.getBoard()[i][j].getStatus() == PUSTE_POLE)
+				{
+					// Make the move 
+					board.getBoard()[i][j].setStatus(KRZYZYK);
+
+					// Call minimax recursively and choose 
+					// the maximum value 
+					best = std::max(best,
+						MINMAX2(board, length, width, depth + 1, !isMax, alfa, beta));
+					alfa = std::max(alfa, best);
+					// Undo the move 
+					board.getBoard()[i][j].setStatus(PUSTE_POLE);
+					if (beta<=alfa)
+						return best;
+				}
+			}
+		}
+		return best;
+	}
+
+	// If this minimizer's move 
+	else
+	{
+		int best = 1000;
+
+		// Traverse all cells 
+		for (int i = 0; i < length; i++)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				// Check if cell is empty 
+				if (board.getBoard()[i][j].getStatus() == PUSTE_POLE)
+				{
+					// Make the move 
+					board.getBoard()[i][j].setStatus(KOLKO);
+
+					// Call minimax recursively and choose 
+					// the minimum value 
+					best = std::min(best,
+						MINMAX2(board, length,width,depth + 1, isMax, alfa,beta));
+					beta = std::min(beta, best);
+					// Undo the move 
+					board.getBoard()[i][j].setStatus(PUSTE_POLE);
+					if (beta <= alfa)
+						return best;
+				}
+			}
+		}
+		return best;
+	}
+}
+
+Move GameState::findBestMove(Board& board, int length, int width) {
+	int bestVal = -1000;
+	Move bestMove;
+	bestMove.i = -1;
+	bestMove.j = -1;
+
+	// Traverse all cells, evaluate minimax function for 
+	// all empty cells. And return the cell with optimal 
+	// value. 
+	for (int i = 0; i < length; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			// Check if cell is empty 
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE)
+			{
+				// Make the move 
+				board.getBoard()[i][j].setStatus(KRZYZYK);
+
+				// compute evaluation function for this 
+				// move. 
+				int moveVal = MINMAX2(board, length,width,0, false, -INFINITY, INFINITY);
+
+				// Undo the move 
+				board.getBoard()[i][j].setStatus(PUSTE_POLE);
+
+				// If the value of the current move is 
+				// more than the best value, then update 
+				// best/ 
+				if (moveVal > bestVal)
+				{
+					bestMove.i = i;
+					bestMove.j = j;
+					bestVal = moveVal;
+				}
+			}
+		}
+	}
+
+	return bestMove;
+}
+
+bool GameState::AIFunction(Player player, Board& board, int length, int width) {
+	int playerChar;
+	int playeropponent;
+	if (player == Player::HUMAN) { playerChar = KRZYZYK; playeropponent = KOLKO; }
+	else {
+		playerChar = KOLKO; playeropponent = KRZYZYK;
+	}
+
+	//komputer gdy ma 4 daje znak aby wygrac
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < length - 4; j++) {
+			// Check horizontals
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 2].getStatus() == playeropponent && board.getBoard()[i][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 4].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j + 4].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 2].getStatus() == playeropponent && board.getBoard()[i][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i][j + 1].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i][j + 2].getStatus() == playeropponent && board.getBoard()[i][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i][j + 1].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 2].getStatus() == PUSTE_POLE && board.getBoard()[i][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i][j + 2].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 2].getStatus() == playeropponent && board.getBoard()[i][j + 3].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i][j + 3].setStatus(playeropponent);
+				return true;
+			}
+
+			// Check verticals
+			if (board.getBoard()[j][i].getStatus() == playeropponent && board.getBoard()[j + 1][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 2][i].getStatus() == playeropponent && board.getBoard()[j + 3][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 4][i].getStatus() == PUSTE_POLE) {
+				board.getBoard()[j + 4][i].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[j][i].getStatus() == PUSTE_POLE && board.getBoard()[j + 1][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 2][i].getStatus() == playeropponent && board.getBoard()[j + 3][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 4][i].getStatus() == playeropponent) {
+				board.getBoard()[j][i].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[j][i].getStatus() == playeropponent && board.getBoard()[j + 1][i].getStatus() == PUSTE_POLE
+				&& board.getBoard()[j + 2][i].getStatus() == playeropponent && board.getBoard()[j + 3][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 4][i].getStatus() == playeropponent) {
+				board.getBoard()[j + 1][i].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[j][i].getStatus() == playeropponent && board.getBoard()[j + 1][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 2][i].getStatus() == PUSTE_POLE && board.getBoard()[j + 3][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 4][i].getStatus() == playeropponent) {
+				board.getBoard()[j + 2][i].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[j][i].getStatus() == playeropponent && board.getBoard()[j + 1][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 2][i].getStatus() == playeropponent && board.getBoard()[j + 3][i].getStatus() == PUSTE_POLE
+				&& board.getBoard()[j + 4][i].getStatus() == playeropponent) {
+				board.getBoard()[j + 2][i].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < width - 4; i++) {
+		for (int j = 0; j < length - 4; j++) {
+			// Check diagonals
+			if (board.getBoard()[i + 4][j].getStatus() == playeropponent && board.getBoard()[i + 3][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 1][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 4].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j + 4].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i + 4][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 3][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 1][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i + 4][j].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i + 4][j].getStatus() == playeropponent && board.getBoard()[i + 3][j + 1].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 1][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i + 3][j + 1].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i + 4][j].getStatus() == playeropponent && board.getBoard()[i + 3][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == PUSTE_POLE && board.getBoard()[i + 1][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i + 2][j + 2].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i + 4][j].getStatus() == playeropponent && board.getBoard()[i + 3][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 1][j + 3].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i + 1][j + 3].setStatus(playeropponent);
+				return true;
+			}
+
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i + 1][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 3][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i + 4][j + 4].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i + 4][j + 4].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 1][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 3][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i + 4][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i + 1][j + 1].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 3][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i + 4][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i + 1][j + 1].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i + 1][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == PUSTE_POLE && board.getBoard()[i + 3][j + 3].getStatus() == playeropponent
+				&& board.getBoard()[i + 4][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i + 2][j + 2].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i + 1][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 3][j + 3].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i + 4][j + 4].getStatus() == playeropponent) {
+				board.getBoard()[i + 3][j + 3].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	//komputer gdy ma 3 zaznaczenia daje 4 aby dazyc do wygranej
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < length - 3; j++) {
+			// Check horizontals
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 2].getStatus() == playeropponent && board.getBoard()[i][j + 3].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j + 3].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 2].getStatus() == playeropponent && board.getBoard()[i][j + 3].getStatus() == playeropponent) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i][j + 1].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i][j + 2].getStatus() == playeropponent && board.getBoard()[i][j + 3].getStatus() == playeropponent) {
+				board.getBoard()[i][j + 1].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 2].getStatus() == PUSTE_POLE && board.getBoard()[i][j + 3].getStatus() == playeropponent) {
+				board.getBoard()[i][j + 2].setStatus(playeropponent);
+				return true;
+			}
+
+			// Check verticals
+			if (board.getBoard()[j][i].getStatus() == playeropponent && board.getBoard()[j + 1][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 2][i].getStatus() == playeropponent && board.getBoard()[j + 3][i].getStatus() == PUSTE_POLE) {
+				board.getBoard()[j + 3][i].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[j][i].getStatus() == PUSTE_POLE && board.getBoard()[j + 1][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 2][i].getStatus() == playeropponent && board.getBoard()[j + 3][i].getStatus() == playeropponent) {
+				board.getBoard()[j][i].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[j][i].getStatus() == playeropponent && board.getBoard()[j + 1][i].getStatus() == PUSTE_POLE
+				&& board.getBoard()[j + 2][i].getStatus() == playeropponent && board.getBoard()[j + 3][i].getStatus() == playeropponent) {
+				board.getBoard()[j + 1][i].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[j][i].getStatus() == playeropponent && board.getBoard()[j + 1][i].getStatus() == playeropponent
+				&& board.getBoard()[j + 2][i].getStatus() == PUSTE_POLE && board.getBoard()[j + 3][i].getStatus() == playeropponent) {
+				board.getBoard()[j + 2][i].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < width - 3; i++) {
+		for (int j = 0; j < length - 3; j++) {
+			// Check diagonals
+			if (board.getBoard()[i + 3][j].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 1].getStatus() == playeropponent && board.getBoard()[i + 1][j + 2].getStatus() == playeropponent
+				&& board.getBoard()[i][j + 3].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j + 3].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i + 3][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 2][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 1][j + 2].getStatus() == playeropponent && board.getBoard()[i][j + 3].getStatus() == playeropponent) {
+				board.getBoard()[i + 3][j].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i + 3][j].getStatus() == playeropponent && board.getBoard()[i + 2][j + 1].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i + 1][j + 2].getStatus() == playeropponent && board.getBoard()[i][j + 3].getStatus() == playeropponent) {
+				board.getBoard()[i + 2][j + 1].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i + 3][j].getStatus() == playeropponent && board.getBoard()[i + 2][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 1][j + 2].getStatus() == PUSTE_POLE && board.getBoard()[i][j + 3].getStatus() == playeropponent) {
+				board.getBoard()[i + 1][j + 2].setStatus(playeropponent);
+				return true;
+			}
+
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i + 1][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 3][j + 3].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i + 3][j + 3].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 1][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 3][j + 3].getStatus() == playeropponent) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i + 1][j + 1].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playeropponent && board.getBoard()[i + 3][j + 3].getStatus() == playeropponent) {
+				board.getBoard()[i + 1][j + 1].setStatus(playeropponent);
+				return true;
+			}
+			if (board.getBoard()[i][j].getStatus() == playeropponent && board.getBoard()[i + 1][j + 1].getStatus() == playeropponent
+				&& board.getBoard()[i + 2][j + 2].getStatus() == PUSTE_POLE && board.getBoard()[i + 3][j + 3].getStatus() == playeropponent) {
+				board.getBoard()[i + 2][j + 2].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+			
+
+	//komputer blokuje gracza gdy ma 3 zaznaczenia
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width - 3; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i][j + 1].getStatus() == playerChar && board.getBoard()[i][j + 2].getStatus() == playerChar
+				&& board.getBoard()[i][j + 3].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j + 3].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width - 2; j++) {
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i][j + 1].getStatus() == playerChar && board.getBoard()[i][j + 2].getStatus() == playerChar
+				&& board.getBoard()[i][j + 3].getStatus() == playerChar) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width - 2; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i][j + 1].getStatus() == PUSTE_POLE && board.getBoard()[i][j + 2].getStatus() == playerChar
+				&& board.getBoard()[i][j + 3].getStatus() == playerChar) {
+				board.getBoard()[i][j + 1].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width - 2; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i][j + 1].getStatus() == playerChar && board.getBoard()[i][j + 2].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i][j + 3].getStatus() == playerChar) {
+				board.getBoard()[i][j + 2].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i + 1][j].getStatus() == playerChar
+				&& board.getBoard()[i + 2][j].getStatus() == playerChar && board.getBoard()[i + 3][j].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i + 3][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 1][j].getStatus() == playerChar
+				&& board.getBoard()[i + 2][j].getStatus() == playerChar && board.getBoard()[i + 3][j].getStatus() == playerChar) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i + 1][j].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i + 2][j].getStatus() == playerChar && board.getBoard()[i + 3][j].getStatus() == playerChar) {
+				board.getBoard()[i + 1][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i + 1][j].getStatus() == playerChar
+				&& board.getBoard()[i + 2][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 3][j].getStatus() == playerChar) {
+				board.getBoard()[i + 2][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width - 3; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i + 1][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playerChar && board.getBoard()[i + 3][j + 3].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i + 3][j + 3].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width - 3; j++) {
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 1][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playerChar && board.getBoard()[i + 3][j + 3].getStatus() == playerChar) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width - 3; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i + 1][j + 1].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playerChar && board.getBoard()[i + 3][j + 3].getStatus() == playerChar) {
+				board.getBoard()[i + 1][j + 1].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width - 3; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i + 1][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i + 2][j + 2].getStatus() == PUSTE_POLE && board.getBoard()[i + 3][j + 3].getStatus() == playerChar) {
+				board.getBoard()[i + 2][j + 2].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width - 3; j++) {
+			if (board.getBoard()[i + 3][j].getStatus() == playerChar && board.getBoard()[i + 2][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i + 1][j + 2].getStatus() == playerChar && board.getBoard()[i][j + 3].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j + 3].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width - 3; j++) {
+			if (board.getBoard()[i + 3][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 2][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i + 1][j + 2].getStatus() == playerChar && board.getBoard()[i][j + 3].getStatus() == playerChar) {
+				board.getBoard()[i + 3][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width - 3; j++) {
+			if (board.getBoard()[i + 3][j].getStatus() == playerChar && board.getBoard()[i + 2][j + 1].getStatus() == PUSTE_POLE
+				&& board.getBoard()[i + 1][j + 2].getStatus() == playerChar && board.getBoard()[i][j + 3].getStatus() == playerChar) {
+				board.getBoard()[i + 2][j + 1].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+	for (int i = 0; i < length - 3; i++) {
+		for (int j = 0; j < width - 3; j++) {
+			if (board.getBoard()[i + 3][j].getStatus() == playerChar && board.getBoard()[i + 2][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i + 1][j + 2].getStatus() == PUSTE_POLE && board.getBoard()[i][j + 3].getStatus() == playerChar) {
+				board.getBoard()[i + 1][j + 2].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	//komputer strzela w losowe miejsce
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < length; j++) {
+			if (board.getBoard()[i][j].getX() == 0 && board.getBoard()[i][j].getY() == 0) {
+				while (true) {
+					x_rand = rand() % 2;
+					y_rand = rand() % 2;
+
+					if (tablica.getBoard()[x_rand][y_rand].getStatus() == KRZYZYK || tablica.getBoard()[x_rand][y_rand].getStatus() == KOLKO)
+						continue;
+					else {
+						tablica.getBoard()[x_rand][y_rand].setStatus(playeropponent);
+						x_temp = x_rand;
+						y_temp = y_rand;
+						break;
+					}
+				}
+				return true;
+			}
+			else if (board.getBoard()[i][j].getX() == 0 && board.getBoard()[i][j].getY() == width - 1) {
+				while (true) {
+					x_rand = rand() % 2;
+					y_rand = rand() % 2;
+
+					if (tablica.getBoard()[x_rand][width - 1 - y_rand].getStatus() == KRZYZYK || tablica.getBoard()[x_rand][width - 1 - y_rand].getStatus() == KOLKO)
+						continue;
+					else {
+						tablica.getBoard()[x_rand][width - 1 - y_rand].setStatus(playeropponent);
+						x_temp = x_rand;
+						y_temp = y_rand;
+						break;
+					}
+				}
+				return true;
+			}
+			else if (board.getBoard()[i][j].getX() == length - 1 && board.getBoard()[i][j].getY() == 0) {
+				while (true) {
+					x_rand = rand() % 2;
+					y_rand = rand() % 2;
+
+					if (tablica.getBoard()[length - 1 - x_rand][y_rand].getStatus() == KRZYZYK || tablica.getBoard()[length - 1 - x_rand][y_rand].getStatus() == KOLKO)
+						continue;
+					else {
+						tablica.getBoard()[length - 1 - x_rand][y_rand].setStatus(playeropponent);
+						x_temp = x_rand;
+						y_temp = y_rand;
+						break;
+					}
+				}
+				return true;
+			}
+			else if (board.getBoard()[i][j].getX() == length - 1 && board.getBoard()[i][j].getY() == width - 1) {
+				while (true) {
+					x_rand = rand() % 2;
+					y_rand = rand() % 2;
+
+					if (tablica.getBoard()[length - 1 - x_rand][width - 1 - y_rand].getStatus() == KRZYZYK || tablica.getBoard()[length - 1 - x_rand][width - 1 - y_rand].getStatus() == KOLKO)
+						continue;
+					else {
+						tablica.getBoard()[length - 1 - x_rand][width - 1 - y_rand].setStatus(playeropponent);
+						x_temp = x_rand;
+						y_temp = y_rand;
+						break;
+					}
+				}
+				return true;
+			}
+			else if (board.getBoard()[i][j].getX() == 0 && (board.getBoard()[i][j].getY() < width - 1 || board.getBoard()[i][j].getY() >0)) {
+				while (true) {
+					x_rand = rand() % 2;
+					y_rand = rand() % 2;
+
+					if (tablica.getBoard()[x_rand][b + y_rand].getStatus() == KRZYZYK || tablica.getBoard()[x_rand][b + y_rand].getStatus() == KOLKO)
+						continue;
+					else {
+						tablica.getBoard()[x_rand][b + y_rand].setStatus(playeropponent);
+						x_temp = x_rand;
+						y_temp = y_rand;
+						break;
+					}
+				}
+				return true;
+			}
+			else if (board.getBoard()[i][j].getX() == length - 1 && (board.getBoard()[i][j].getY() > 0 || board.getBoard()[i][j].getY() < width - 1)) {
+				while (true) {
+					x_rand = rand() % 2;
+					y_rand = rand() % 2;
+
+					if (tablica.getBoard()[length - 1 - x_rand][b + y_rand].getStatus() == KRZYZYK || tablica.getBoard()[length - 1 - x_rand][b + y_rand].getStatus() == KOLKO)
+						continue;
+					else {
+						tablica.getBoard()[length - 1 - x_rand][b + y_rand].setStatus(playeropponent);
+						y_temp = x_rand;
+						y_temp = y_rand;
+						break;
+					}
+				}
+				return true;
+			}
+			else if (board.getBoard()[i][j].getY() == 0 && (board.getBoard()[i][j].getX() > 0 || board.getBoard()[i][j].getX() < length - 1)) {
+				while (true) {
+					x_rand = rand() % 2;
+					y_rand = rand() % 2;
+
+					if (tablica.getBoard()[a + x_rand][y_rand].getStatus() == KRZYZYK || tablica.getBoard()[a + x_rand][y_rand].getStatus() == KOLKO)
+						continue;
+					else {
+						tablica.getBoard()[a + x_rand][y_rand].setStatus(playeropponent);
+						x_temp = x_rand;
+						y_temp = y_rand;
+						break;
+					}
+				}
+				return true;
+			}
+			else if (board.getBoard()[i][j].getY() == width - 1 && (board.getBoard()[i][j].getX() > 0 || board.getBoard()[i][j].getX() < length - 1)) {
+				while (true) {
+					x_rand = rand() % 2;
+					y_rand = rand() % 2;
+
+					if (tablica.getBoard()[a + x_rand][width - 1 - y_rand].getStatus() == KRZYZYK || tablica.getBoard()[a + x_rand][width - 1 - y_rand].getStatus() == KOLKO)
+						continue;
+					else {
+						tablica.getBoard()[a + x_rand][width - 1 - y_rand].setStatus(playeropponent);
+						x_temp = x_rand;
+						y_temp = y_rand;
+						break;
+					}
+				}
+				return true;
+			}
+			else {
+
+				Board board_temp;
+				board_temp.getBoard()[0][0].setStatus(board.getBoard()[x_temp - 1][y_temp - 1].getStatus());
+				board_temp.getBoard()[0][1].setStatus(board.getBoard()[x_temp - 1][y_temp].getStatus());
+				board_temp.getBoard()[0][2].setStatus(board.getBoard()[x_temp - 1][y_temp + 1].getStatus());
+				board_temp.getBoard()[1][0].setStatus(board.getBoard()[x_temp][y_temp - 1].getStatus());
+				board_temp.getBoard()[1][1].setStatus(board.getBoard()[x_temp][y_temp].getStatus());
+				board_temp.getBoard()[1][2].setStatus(board.getBoard()[x_temp][y_temp + 1].getStatus());
+				board_temp.getBoard()[2][0].setStatus(board.getBoard()[x_temp + 1][y_temp - 1].getStatus());
+				board_temp.getBoard()[2][1].setStatus(board.getBoard()[x_temp + 1][y_temp].getStatus());
+				board_temp.getBoard()[2][2].setStatus(board.getBoard()[x_temp + 1][y_temp + 1].getStatus());
+
+				for (int i = 0; i < 3; i++)
+				{
+					for (int j = 0; j < 3; j++)
+						std::cout << board_temp.getBoard()[j][i].getStatus();
+					std::cout << std::endl;
+				}
+
+				Move bestMove = findBestMove(board_temp, 3, 3);
+				std::cout << bestMove.i << " " << bestMove.j << std::endl;
+				board_temp.getBoard()[bestMove.i][bestMove.j].setStatus(playeropponent);
+				board.getBoard()[x_temp - 1 + bestMove.i][y_temp - 1 + bestMove.j].setStatus(playeropponent);
+				a = x_temp - 1 + bestMove.i;
+				b = y_temp - 1 + bestMove.j;
+				return true;
+			}
+		}
+	}
 	
-	if(!table5x5)
-		while(true){
-			x_rand = rand() % length;
-			y_rand = rand() % width;
 
-			if (board.board[x_rand][y_rand].getStatus() == KRZYZYK || board.board[x_rand][y_rand].getStatus() == KOLKO)
-				continue;
-			else {
-				board.board[x_rand][y_rand].setStatus(KOLKO);
-				std::cout << "x: " << x_rand << " y: " << y_rand << std::endl;
-				max--;
-				break;
+	//komputer blokuje gracza gdy ma 2 zaznaczenia
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width-2; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i][j + 1].getStatus() == playerChar && board.getBoard()[i][j + 2].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j + 2].setStatus(playeropponent);
+				return true;
 			}
 		}
-	else
-		while (true) {
-			x_rand = rand() % length;
-			y_rand = rand() % width;
+	}
 
-			if (board.board5x5[x_rand][y_rand].getStatus() == KRZYZYK || board.board5x5[x_rand][y_rand].getStatus() == KOLKO)
-				continue;
-			else {
-				board.board5x5[x_rand][y_rand].setStatus(KOLKO);
-				std::cout << "x: " << x_rand << " y: " << y_rand << std::endl;
-				max5x5--;
-				break;
+	for (int i = 0; i < length; i++) {
+		for (int j = 0; j < width - 2; j++) {
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i][j + 1].getStatus() == playerChar && board.getBoard()[i][j + 2].getStatus() == playerChar) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
 			}
 		}
+	}
+
+	for (int i = 0; i < length-2; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i + 1][j].getStatus() == playerChar 
+				&& board.getBoard()[i + 2][j].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i + 2][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 2; i++) {
+		for (int j = 0; j < width; j++) {
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 1][j].getStatus() == playerChar
+				&& board.getBoard()[i + 2][j].getStatus() == playerChar) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length-2; i++) {
+		for (int j = 0; j < width-2; j++) {
+			if (board.getBoard()[i][j].getStatus() == playerChar && board.getBoard()[i + 1][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i + 2][j + 2].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i + 2][j + 2].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 2; i++) {
+		for (int j = 0; j < width - 2; j++) {
+			if (board.getBoard()[i][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 1][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i + 2][j + 2].getStatus() == playerChar) {
+				board.getBoard()[i][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 2; i++) {
+		for (int j = 0; j < width - 2; j++) {
+			if (board.getBoard()[i + 2][j].getStatus() == playerChar && board.getBoard()[i + 1][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i][j + 2].getStatus() == PUSTE_POLE) {
+				board.getBoard()[i][j + 2].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	for (int i = 0; i < length - 2; i++) {
+		for (int j = 0; j < width - 2; j++) {
+			if (board.getBoard()[i + 2][j].getStatus() == PUSTE_POLE && board.getBoard()[i + 1][j + 1].getStatus() == playerChar
+				&& board.getBoard()[i][j + 2].getStatus() == playerChar) {
+				board.getBoard()[i + 2][j].setStatus(playeropponent);
+				return true;
+			}
+		}
+	}
+
+	while (true) {
+		x_rand = rand() % length;
+		y_rand = rand() % width;
+
+		if (tablica.getBoard()[x_rand][y_rand].getStatus() == KRZYZYK || tablica.getBoard()[x_rand][y_rand].getStatus() == KOLKO)
+			continue;
+		else {
+			tablica.getBoard()[x_rand][y_rand].setStatus(playeropponent);
+			break;
+		}
+	}
+	return true;
 }
 
-void GameState::playerFunction(Event& event, Vector2f mouse, int length, int width, bool table5x5) {
-
-	Vector2u tempSpriteSize = krzyzyk.getTexture()->getSize();
-
-	if(!table5x5)
-		for (int i = 0; i < length; i++) {
-			for (int j = 0; j < width; j++) {
-				if (board.board[i][j].getField().getGlobalBounds().contains(mouse)) {
-					if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-						if (board.board[i][j].getStatus() == PUSTE_POLE) {
-							a = i;
-							b = j;
-							x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-							y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-							board.board[a][b].setStatus(KRZYZYK);
-							krzyzyk.setPosition(x, y);
-							music.playKrzyzykMusic();
-							max--;
-							AI = true;
-						}
-					}
-				}
-			}
-		}
-	else
-		for (int i = 0; i < length; i++) {
-			for (int j = 0; j < width; j++) {
-				if (board.board5x5[i][j].getField().getGlobalBounds().contains(mouse)) {
-					if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-						if (board.board5x5[i][j].getStatus() == PUSTE_POLE) {
-							a = i;
-							b = j;
-							x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
-							y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
-							board.board5x5[a][b].setStatus(KRZYZYK);
-							krzyzyk.setPosition(x, y);
-							music.playKrzyzykMusic();
-							max5x5--;
-							AI = true;
-						}
-					}
-				}
-			}
-		}
-}
-
-void GameState::playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width, bool table5x5) {
+void GameState::playerFunctionMultiplayer(Event& event, Vector2f mouse, int length, int width) {
 
 	Vector2u tempSpriteSize;
 
-	if(!table5x5)
 		for (int i = 0; i < length; i++) {
 			for (int j = 0; j < width; j++) {
-				if (board.board[i][j].getField().getGlobalBounds().contains(mouse)) {
+				if (tablica.getBoard()[i][j].getField().getGlobalBounds().contains(mouse)) {
 					if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-						if (board.board[i][j].getStatus() == PUSTE_POLE) {
+						if (tablica.getBoard()[i][j].getStatus() == PUSTE_POLE) {
 							a = i;
 							b = j;
-							x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-							y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
 							if (opponent) {
-								tempSpriteSize = kolko.getTexture()->getSize();
 								a = i;
 								b = j;
-								x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-								y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-								board.board[a][b].setStatus(KOLKO);
-								kolko.setPosition(x, y);
+								tablica.getBoard()[a][b].setStatus(KOLKO);
 								music.playKrzyzykMusic();
 								opponent = false;
 							}
 							else {
-								tempSpriteSize = krzyzyk.getTexture()->getSize();
 								a = i;
 								b = j;
-								x = board.getBoardSprite().getPosition().x + (tempSpriteSize.x * i) - 7;
-								y = board.getBoardSprite().getPosition().y + (tempSpriteSize.y * j) - 7;
-								board.board[a][b].setStatus(KRZYZYK);
-								krzyzyk.setPosition(x, y);
+								tablica.getBoard()[a][b].setStatus(KRZYZYK);
 								music.playKrzyzykMusic();
 								opponent = true;
 							}
-							max--;
-						}
-					}
-				}
-			}
-		}
-	else
-		for (int i = 0; i < length; i++) {
-			for (int j = 0; j < width; j++) {
-				if (board.board5x5[i][j].getField().getGlobalBounds().contains(mouse)) {
-					if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left) {
-						if (board.board5x5[i][j].getStatus() == PUSTE_POLE) {
-							a = i;
-							b = j;
-							x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
-							y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
-							if (opponent) {
-								tempSpriteSize = kolko.getTexture()->getSize();
-								a = i;
-								b = j;
-								x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
-								y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
-								board.board5x5[a][b].setStatus(KOLKO);
-								kolko.setPosition(x, y);
-								music.playKrzyzykMusic();
-								opponent = false;
-							}
-							else {
-								tempSpriteSize = krzyzyk.getTexture()->getSize();
-								a = i;
-								b = j;
-								x = board.getBoardSprite5x5().getPosition().x + (tempSpriteSize.x * i) - 7;
-								y = board.getBoardSprite5x5().getPosition().y + (tempSpriteSize.y * j) - 7;
-								board.board5x5[a][b].setStatus(KRZYZYK);
-								krzyzyk.setPosition(x, y);
-								music.playKrzyzykMusic();
-								opponent = true;
-							}
-							max5x5--;
 						}
 					}
 				}
@@ -306,708 +1181,178 @@ void GameState::playerFunctionMultiplayer(Event& event, Vector2f mouse, int leng
 		}
 }
 
-int GameState::checkWin(RenderWindow& window, bool table5x5) {
-
-	if (!table5x5) {
-		if (board.board[0][0].getStatus() == KRZYZYK && board.board[1][1].getStatus() == KRZYZYK && board.board[2][2].getStatus() == KRZYZYK) {
-			x = board.board[0][0].getField().getPosition().x - 7;
-			y = board.board[0][0].getField().getPosition().y - 7;
-			krzyzykWin[0].setPosition(x, y);
-
-			x = board.board[1][1].getField().getPosition().x - 7;
-			y = board.board[1][1].getField().getPosition().y - 7;
-			krzyzykWin[1].setPosition(x, y);
-
-			x = board.board[2][2].getField().getPosition().x - 7;
-			y = board.board[2][2].getField().getPosition().y - 7;
-			krzyzykWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(krzyzykWin[i]);
-			window.display();
-
-			std::cout << "Wygralem" << std::endl;
-			return KRZYZYK;
-		}
-		else if (board.board[0][2].getStatus() == KRZYZYK && board.board[1][1].getStatus() == KRZYZYK && board.board[2][0].getStatus() == KRZYZYK) {
-			x = board.board[0][2].getField().getPosition().x - 7;
-			y = board.board[0][2].getField().getPosition().y - 7;
-			krzyzykWin[0].setPosition(x, y);
-
-			x = board.board[1][1].getField().getPosition().x - 7;
-			y = board.board[1][1].getField().getPosition().y - 7;
-			krzyzykWin[1].setPosition(x, y);
-
-			x = board.board[2][0].getField().getPosition().x - 7;
-			y = board.board[2][0].getField().getPosition().y - 7;
-			krzyzykWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(krzyzykWin[i]);
-			window.display();
-
-			std::cout << "Wygralem" << std::endl;
-			return KRZYZYK;
-		}
-		else if (board.board[0][0].getStatus() == KRZYZYK && board.board[0][1].getStatus() == KRZYZYK && board.board[0][2].getStatus() == KRZYZYK) {
-			x = board.board[0][0].getField().getPosition().x - 7;
-			y = board.board[0][0].getField().getPosition().y - 7;
-			krzyzykWin[0].setPosition(x, y);
-
-			x = board.board[0][1].getField().getPosition().x - 7;
-			y = board.board[0][1].getField().getPosition().y - 7;
-			krzyzykWin[1].setPosition(x, y);
-
-			x = board.board[0][2].getField().getPosition().x - 7;
-			y = board.board[0][2].getField().getPosition().y - 7;
-			krzyzykWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(krzyzykWin[i]);
-			window.display();
-
-			std::cout << "Wygralem" << std::endl;
-			return KRZYZYK;
-		}
-		else if (board.board[1][0].getStatus() == KRZYZYK && board.board[1][1].getStatus() == KRZYZYK && board.board[1][2].getStatus() == KRZYZYK) {
-			x = board.board[1][0].getField().getPosition().x - 7;
-			y = board.board[1][0].getField().getPosition().y - 7;
-			krzyzykWin[0].setPosition(x, y);
-
-			x = board.board[1][1].getField().getPosition().x - 7;
-			y = board.board[1][1].getField().getPosition().y - 7;
-			krzyzykWin[1].setPosition(x, y);
-
-			x = board.board[1][2].getField().getPosition().x - 7;
-			y = board.board[1][2].getField().getPosition().y - 7;
-			krzyzykWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(krzyzykWin[i]);
-			window.display();
-
-			std::cout << "Wygralem" << std::endl;
-			return KRZYZYK;
-		}
-		else if (board.board[2][0].getStatus() == KRZYZYK && board.board[2][1].getStatus() == KRZYZYK && board.board[2][2].getStatus() == KRZYZYK) {
-			x = board.board[2][0].getField().getPosition().x - 7;
-			y = board.board[2][0].getField().getPosition().y - 7;
-			krzyzykWin[0].setPosition(x, y);
-
-			x = board.board[2][1].getField().getPosition().x - 7;
-			y = board.board[2][1].getField().getPosition().y - 7;
-			krzyzykWin[1].setPosition(x, y);
-
-			x = board.board[2][2].getField().getPosition().x - 7;
-			y = board.board[2][2].getField().getPosition().y - 7;
-			krzyzykWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(krzyzykWin[i]);
-			window.display();
-
-			std::cout << "Wygralem" << std::endl;
-			return KRZYZYK;
-		}
-		else if (board.board[0][0].getStatus() == KRZYZYK && board.board[1][0].getStatus() == KRZYZYK && board.board[2][0].getStatus() == KRZYZYK) {
-			x = board.board[0][0].getField().getPosition().x - 7;
-			y = board.board[0][0].getField().getPosition().y - 7;
-			krzyzykWin[0].setPosition(x, y);
-
-			x = board.board[1][0].getField().getPosition().x - 7;
-			y = board.board[1][0].getField().getPosition().y - 7;
-			krzyzykWin[1].setPosition(x, y);
-
-			x = board.board[2][0].getField().getPosition().x - 7;
-			y = board.board[2][0].getField().getPosition().y - 7;
-			krzyzykWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(krzyzykWin[i]);
-			window.display();
-
-			std::cout << "Wygralem" << std::endl;
-			return KRZYZYK;
-		}
-		else if (board.board[0][1].getStatus() == KRZYZYK && board.board[1][1].getStatus() == KRZYZYK && board.board[2][1].getStatus() == KRZYZYK) {
-			x = board.board[0][1].getField().getPosition().x - 7;
-			y = board.board[0][1].getField().getPosition().y - 7;
-			krzyzykWin[0].setPosition(x, y);
-
-			x = board.board[1][1].getField().getPosition().x - 7;
-			y = board.board[1][1].getField().getPosition().y - 7;
-			krzyzykWin[1].setPosition(x, y);
-
-			x = board.board[2][1].getField().getPosition().x - 7;
-			y = board.board[2][1].getField().getPosition().y - 7;
-			krzyzykWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(krzyzykWin[i]);
-			window.display();
-
-			std::cout << "Wygralem" << std::endl;
-			return KRZYZYK;
-		}
-		else if (board.board[0][2].getStatus() == KRZYZYK && board.board[1][2].getStatus() == KRZYZYK && board.board[2][2].getStatus() == KRZYZYK) {
-			x = board.board[0][2].getField().getPosition().x - 7;
-			y = board.board[0][2].getField().getPosition().y - 7;
-			krzyzykWin[0].setPosition(x, y);
-
-			x = board.board[1][2].getField().getPosition().x - 7;
-			y = board.board[1][2].getField().getPosition().y - 7;
-			krzyzykWin[1].setPosition(x, y);
-
-			x = board.board[2][2].getField().getPosition().x - 7;
-			y = board.board[2][2].getField().getPosition().y - 7;
-			krzyzykWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(krzyzykWin[i]);
-			window.display();
-
-			std::cout << "Wygralem" << std::endl;
-			return KRZYZYK;
-		}
-		else if (board.board[0][0].getStatus() == KOLKO && board.board[1][1].getStatus() == KOLKO && board.board[2][2].getStatus() == KOLKO) {
-			x = board.board[0][0].getField().getPosition().x - 7;
-			y = board.board[0][0].getField().getPosition().y - 7;
-			kolkoWin[0].setPosition(x, y);
-
-			x = board.board[1][1].getField().getPosition().x - 7;
-			y = board.board[1][1].getField().getPosition().y - 7;
-			kolkoWin[1].setPosition(x, y);
-
-			x = board.board[2][2].getField().getPosition().x - 7;
-			y = board.board[2][2].getField().getPosition().y - 7;
-			kolkoWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(kolkoWin[i]);
-			window.display();
-
-			std::cout << "przegralem" << std::endl;
-			return KOLKO;
-		}
-		else if (board.board[0][2].getStatus() == KOLKO && board.board[1][1].getStatus() == KOLKO && board.board[2][0].getStatus() == KOLKO) {
-			x = board.board[0][2].getField().getPosition().x - 7;
-			y = board.board[0][2].getField().getPosition().y - 7;
-			kolkoWin[0].setPosition(x, y);
-
-			x = board.board[1][1].getField().getPosition().x - 7;
-			y = board.board[1][1].getField().getPosition().y - 7;
-			kolkoWin[1].setPosition(x, y);
-
-			x = board.board[2][0].getField().getPosition().x - 7;
-			y = board.board[2][0].getField().getPosition().y - 7;
-			kolkoWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(kolkoWin[i]);
-			window.display();
-
-			std::cout << "przegralem" << std::endl;
-			return KOLKO;
-		}
-		else if (board.board[0][0].getStatus() == KOLKO && board.board[0][1].getStatus() == KOLKO && board.board[0][2].getStatus() == KOLKO) {
-			x = board.board[0][0].getField().getPosition().x - 7;
-			y = board.board[0][0].getField().getPosition().y - 7;
-			kolkoWin[0].setPosition(x, y);
-
-			x = board.board[0][1].getField().getPosition().x - 7;
-			y = board.board[0][1].getField().getPosition().y - 7;
-			kolkoWin[1].setPosition(x, y);
-
-			x = board.board[0][2].getField().getPosition().x - 7;
-			y = board.board[0][2].getField().getPosition().y - 7;
-			kolkoWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(kolkoWin[i]);
-			window.display();
-
-			std::cout << "przegralem" << std::endl;
-			return KOLKO;
-		}
-		else if (board.board[1][0].getStatus() == KOLKO && board.board[1][1].getStatus() == KOLKO && board.board[1][2].getStatus() == KOLKO) {
-			x = board.board[1][0].getField().getPosition().x - 7;
-			y = board.board[1][0].getField().getPosition().y - 7;
-			kolkoWin[0].setPosition(x, y);
-
-			x = board.board[1][1].getField().getPosition().x - 7;
-			y = board.board[1][1].getField().getPosition().y - 7;
-			kolkoWin[1].setPosition(x, y);
-
-			x = board.board[1][2].getField().getPosition().x - 7;
-			y = board.board[1][2].getField().getPosition().y - 7;
-			kolkoWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(kolkoWin[i]);
-			window.display();
-
-			std::cout << "przegralem" << std::endl;
-			return KOLKO;
-		}
-		else if (board.board[2][0].getStatus() == KOLKO && board.board[2][1].getStatus() == KOLKO && board.board[2][2].getStatus() == KOLKO) {
-			x = board.board[2][0].getField().getPosition().x - 7;
-			y = board.board[2][0].getField().getPosition().y - 7;
-			kolkoWin[0].setPosition(x, y);
-
-			x = board.board[2][1].getField().getPosition().x - 7;
-			y = board.board[2][1].getField().getPosition().y - 7;
-			kolkoWin[1].setPosition(x, y);
-
-			x = board.board[2][2].getField().getPosition().x - 7;
-			y = board.board[2][2].getField().getPosition().y - 7;
-			kolkoWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(kolkoWin[i]);
-			window.display();
-
-			std::cout << "przegralem" << std::endl;
-			return KOLKO;
-		}
-		else if (board.board[0][0].getStatus() == KOLKO && board.board[1][0].getStatus() == KOLKO && board.board[2][0].getStatus() == KOLKO) {
-			x = board.board[0][0].getField().getPosition().x - 7;
-			y = board.board[0][0].getField().getPosition().y - 7;
-			kolkoWin[0].setPosition(x, y);
-
-			x = board.board[1][0].getField().getPosition().x - 7;
-			y = board.board[1][0].getField().getPosition().y - 7;
-			kolkoWin[1].setPosition(x, y);
-
-			x = board.board[2][0].getField().getPosition().x - 7;
-			y = board.board[2][0].getField().getPosition().y - 7;
-			kolkoWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(kolkoWin[i]);
-			window.display();
-
-			std::cout << "przegralem" << std::endl;
-			return KOLKO;
-		}
-		else if (board.board[0][2].getStatus() == KOLKO && board.board[1][2].getStatus() == KOLKO && board.board[2][2].getStatus() == KOLKO) {
-			x = board.board[0][2].getField().getPosition().x - 7;
-			y = board.board[0][2].getField().getPosition().y - 7;
-			kolkoWin[0].setPosition(x, y);
-
-			x = board.board[1][2].getField().getPosition().x - 7;
-			y = board.board[1][2].getField().getPosition().y - 7;
-			kolkoWin[1].setPosition(x, y);
-
-			x = board.board[2][2].getField().getPosition().x - 7;
-			y = board.board[2][2].getField().getPosition().y - 7;
-			kolkoWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(kolkoWin[i]);
-			window.display();
-
-			std::cout << "przegralem" << std::endl;
-			return KOLKO;
-		}
-		else if (board.board[2][0].getStatus() == KOLKO && board.board[2][1].getStatus() == KOLKO && board.board[2][2].getStatus() == KOLKO) {
-			x = board.board[2][0].getField().getPosition().x - 7;
-			y = board.board[2][0].getField().getPosition().y - 7;
-			kolkoWin[0].setPosition(x, y);
-
-			x = board.board[2][1].getField().getPosition().x - 7;
-			y = board.board[2][1].getField().getPosition().y - 7;
-			kolkoWin[1].setPosition(x, y);
-
-			x = board.board[2][2].getField().getPosition().x - 7;
-			y = board.board[2][2].getField().getPosition().y - 7;
-			kolkoWin[2].setPosition(x, y);
-
-			for (int i = 0; i < 3; i++)
-				window.draw(kolkoWin[i]);
-			window.display();
-
-			std::cout << "przegralem" << std::endl;
-			return KOLKO;
-		}
-		else {
-			return PUSTE_POLE;
-		}
+int GameState::game(RenderWindow& window, Event& event, Vector2f mouse, int numer) {
+	if (checker)
+	{
+		gameload(window, event, numer);
+		srand(time(NULL));
+		checker = false;
 	}
-	else {
-		for (int i = 0; i < 5; i++)
-			for (int j = 0; j < 5; j++)
-			{
-				if (board.board5x5[i][j].getStatus() == KRZYZYK && board.board5x5[i][j + 1].getStatus() == KRZYZYK && board.board5x5[i][j + 2].getStatus() == KRZYZYK) {
-					x = board.board5x5[i][j].getField().getPosition().x - 6;
-					y = board.board5x5[i][j].getField().getPosition().y - 6;
-					krzyzykWin[0].setPosition(x, y);
-
-					x = board.board5x5[i][j + 1].getField().getPosition().x - 6;
-					y = board.board5x5[i][j + 1].getField().getPosition().y - 6;
-					krzyzykWin[1].setPosition(x, y);
-
-					x = board.board5x5[i][j + 2].getField().getPosition().x - 6;
-					y = board.board5x5[i][j + 2].getField().getPosition().y - 6;
-					krzyzykWin[2].setPosition(x, y);
-
-					for (int i = 0; i < 3; i++)
-						window.draw(krzyzykWin[i]);
-					window.display();
-
-					std::cout << "Wygralem" << std::endl;
-					return KRZYZYK;
-				}
-				else if (board.board5x5[i][j].getStatus() == KRZYZYK && board.board5x5[i + 1][j].getStatus() == KRZYZYK && board.board5x5[i + 2][j].getStatus() == KRZYZYK) {
-					x = board.board5x5[i][j].getField().getPosition().x - 6;
-					y = board.board5x5[i][j].getField().getPosition().y - 6;
-					krzyzykWin[0].setPosition(x, y);
-
-					x = board.board5x5[i + 1][j].getField().getPosition().x - 6;
-					y = board.board5x5[i + 1][j].getField().getPosition().y - 6;
-					krzyzykWin[1].setPosition(x, y);
-
-					x = board.board5x5[i + 2][j].getField().getPosition().x - 6;
-					y = board.board5x5[i + 2][j].getField().getPosition().y - 6;
-					krzyzykWin[2].setPosition(x, y);
-
-					for (int i = 0; i < 3; i++)
-						window.draw(krzyzykWin[i]);
-					window.display();
-
-					std::cout << "Wygralem" << std::endl;
-					return KRZYZYK;
-				}
-				else if (board.board5x5[i][j].getStatus() == KRZYZYK && board.board5x5[i + 1][j + 1].getStatus() == KRZYZYK && board.board5x5[i + 2][j + 2].getStatus() == KRZYZYK) {
-					x = board.board5x5[i][j].getField().getPosition().x - 6;
-					y = board.board5x5[i][j].getField().getPosition().y - 6;
-					krzyzykWin[0].setPosition(x, y);
-
-					x = board.board5x5[i + 1][j + 1].getField().getPosition().x - 6;
-					y = board.board5x5[i + 1][j + 1].getField().getPosition().y - 6;
-					krzyzykWin[1].setPosition(x, y);
-
-					x = board.board5x5[i + 2][j + 2].getField().getPosition().x - 6;
-					y = board.board5x5[i + 2][j + 2].getField().getPosition().y - 6;
-					krzyzykWin[2].setPosition(x, y);
-
-					for (int i = 0; i < 3; i++)
-						window.draw(krzyzykWin[i]);
-					window.display();
-
-					std::cout << "Wygralem" << std::endl;
-					return KRZYZYK;
-				}
-				else if (board.board5x5[i + 2][j].getStatus() == KRZYZYK && board.board5x5[i + 1][j + 1].getStatus() == KRZYZYK && board.board5x5[i][j + 2].getStatus() == KRZYZYK) {
-					x = board.board5x5[i + 2][j].getField().getPosition().x - 6;
-					y = board.board5x5[i + 2][j].getField().getPosition().y - 6;
-					krzyzykWin[0].setPosition(x, y);
-
-					x = board.board5x5[i + 1][j + 1].getField().getPosition().x - 6;
-					y = board.board5x5[i + 1][j + 1].getField().getPosition().y - 6;
-					krzyzykWin[1].setPosition(x, y);
-
-					x = board.board5x5[i][j + 2].getField().getPosition().x - 6;
-					y = board.board5x5[i][j + 2].getField().getPosition().y - 6;
-					krzyzykWin[2].setPosition(x, y);
-
-					for (int i = 0; i < 3; i++)
-						window.draw(krzyzykWin[i]);
-					window.display();
-
-					std::cout << "Wygralem" << std::endl;
-					return KRZYZYK;
-				}
-				else if (board.board5x5[i][j].getStatus() == KOLKO && board.board5x5[i][j + 1].getStatus() == KOLKO && board.board5x5[i][j + 2].getStatus() == KOLKO) {
-					x = board.board5x5[i][j].getField().getPosition().x - 6;
-					y = board.board5x5[i][j].getField().getPosition().y - 6;
-					kolkoWin[0].setPosition(x, y);
-
-					x = board.board5x5[i][j + 1].getField().getPosition().x - 6;
-					y = board.board5x5[i][j + 1].getField().getPosition().y - 6;
-					kolkoWin[1].setPosition(x, y);
-
-					x = board.board5x5[i][j + 2].getField().getPosition().x - 6;
-					y = board.board5x5[i][j + 2].getField().getPosition().y - 6;
-					kolkoWin[2].setPosition(x, y);
-
-					for (int i = 0; i < 3; i++)
-						window.draw(kolkoWin[i]);
-					window.display();
-
-					std::cout << "Przegralem" << std::endl;
-					return KOLKO;
-				}
-				else if (board.board5x5[i][j].getStatus() == KOLKO && board.board5x5[i + 1][j].getStatus() == KOLKO && board.board5x5[i + 2][j].getStatus() == KOLKO) {
-					x = board.board5x5[i][j].getField().getPosition().x - 6;
-					y = board.board5x5[i][j].getField().getPosition().y - 6;
-					kolkoWin[0].setPosition(x, y);
-
-					x = board.board5x5[i + 1][j].getField().getPosition().x - 6;
-					y = board.board5x5[i + 1][j].getField().getPosition().y - 6;
-					kolkoWin[1].setPosition(x, y);
-
-					x = board.board5x5[i + 2][j].getField().getPosition().x - 6;
-					y = board.board5x5[i + 2][j].getField().getPosition().y - 6;
-					kolkoWin[2].setPosition(x, y);
-
-					for (int i = 0; i < 3; i++)
-						window.draw(kolkoWin[i]);
-					window.display();
-
-					std::cout << "Przegralem" << std::endl;
-					return KOLKO;
-				}
-				else if (board.board5x5[i][j].getStatus() == KOLKO && board.board5x5[i + 1][j + 1].getStatus() == KOLKO && board.board5x5[i + 2][j + 2].getStatus() == KOLKO) {
-					x = board.board5x5[i][j].getField().getPosition().x - 6;
-					y = board.board5x5[i][j].getField().getPosition().y - 6;
-					kolkoWin[0].setPosition(x, y);
-
-					x = board.board5x5[i + 1][j + 1].getField().getPosition().x - 6;
-					y = board.board5x5[i + 1][j + 1].getField().getPosition().y - 6;
-					kolkoWin[1].setPosition(x, y);
-
-					x = board.board5x5[i + 2][j + 2].getField().getPosition().x - 6;
-					y = board.board5x5[i + 2][j + 2].getField().getPosition().y - 6;
-					kolkoWin[2].setPosition(x, y);
-
-					for (int i = 0; i < 3; i++)
-						window.draw(kolkoWin[i]);
-					window.display();
-
-					std::cout << "Przegralem" << std::endl;
-					return KOLKO;
-				}
-				else if (board.board5x5[i + 2][j].getStatus() == KOLKO && board.board5x5[i + 1][j + 1].getStatus() == KOLKO && board.board5x5[i][j + 2].getStatus() == KOLKO) {
-					x = board.board5x5[i + 2][j].getField().getPosition().x - 6;
-					y = board.board5x5[i + 2][j].getField().getPosition().y - 6;
-					kolkoWin[0].setPosition(x, y);
-
-					x = board.board5x5[i + 1][j + 1].getField().getPosition().x - 6;
-					y = board.board5x5[i + 1][j + 1].getField().getPosition().y - 6;
-					kolkoWin[1].setPosition(x, y);
-
-					x = board.board5x5[i][j + 2].getField().getPosition().x - 6;
-					y = board.board5x5[i][j + 2].getField().getPosition().y - 6;
-					kolkoWin[2].setPosition(x, y);
-
-					for (int i = 0; i < 3; i++)
-						window.draw(kolkoWin[i]);
-					window.display();
-
-					std::cout << "Przegralem" << std::endl;
-					return KOLKO;
-				}
-			}
+	doIt(window, numer);
+	drawKrzyzykAndKolko(window, numer, numer);
+	playerFunction(event, mouse, numer, numer);
+	if (checkWin(Player::HUMAN, tablica, numer, numer)) {
+		checker = true;
+		return STATE_WIN;
 	}
-
-	return PUSTE_POLE;
-}
-
-int GameState::game(RenderWindow& window, Event& event, Vector2f mouse) {
-		gameload(window, event);
-		playerFunction(event, mouse,3,3, false);
-		drawKrzyzykAndKolko(window,3,3, false);
-
-		if (max == 0) {
-			if (checkWin(window, false) == KRZYZYK) {
-				std::cout << "WYGRANA" << std::endl;
-				max = 9;
-				music.playWinMusic();
-				waiting(1);
-				return STATE_WIN;
-			}else if (checkWin(window, false) == KOLKO) {
-				max = 9;
-				std::cout << "PRZEGRANA" << std::endl;
-				music.playLostMusic();
-				waiting(1);
-				return STATE_LOSE;
-			}
-			else {
-				std::cout << "REMIS" << std::endl;
-				max = 9;
-				music.playLostMusic();
-				waiting(1);
-				return STATE_REMIS;
-			}
-		}
-		else {
-			if (AI)
-			{
-				AIFunction(3, 3, false);
-				AI = false;
-			}
-
-			if (checkWin(window, false) == KRZYZYK) {
-				std::cout << "WYGRANA" << std::endl;
-				max = 9;
-				music.playWinMusic();
-				waiting(1);
-				return STATE_WIN;
-			}
-
-			if (checkWin(window, false) == KOLKO) {
-				max = 9;
-				std::cout << "PRZEGRANA" << std::endl;
-				music.playLostMusic();
-				waiting(1);
+	if (!isMovesLeft(tablica,numer,numer)) {
+		checker = true;
+		return STATE_REMIS;
+	}
+	if (AI_check)
+	{
+		if (numer == 3) {
+			//Move AImove = minimax(tablica, numer, numer);
+			Move AImove = findBestMove(tablica, numer, numer);
+			tablica.getBoard()[AImove.i][AImove.j].setStatus(KOLKO);
+			if (checkWin(Player::AI, tablica, numer, numer)) {
+				checker = true;
 				return STATE_LOSE;
 			}
 		}
-
+		else if (numer == 4) {
+			//AIFunction(Player::HUMAN, tablica, numer, numer);
+			Move AImove = findBestMove(tablica, numer, numer);
+			tablica.getBoard()[AImove.i][AImove.j].setStatus(KOLKO);
+			if (checkWin(Player::AI, tablica, numer, numer)) {
+				checker = true;
+				return STATE_LOSE;
+			}
+		}
+		else {
+			//AIFunction(Player::HUMAN, tablica, numer, numer);
+			Move AImove = findBestMove(tablica, numer, numer);
+			tablica.getBoard()[AImove.i][AImove.j].setStatus(KOLKO);
+			if (checkWin(Player::AI, tablica, numer, numer)) {
+				checker = true;
+				return STATE_LOSE;
+			}
+		}
+		AI_check = false;
+	}
 		return pauseButton(mouse, event, STATE_GAME);
 }
 
-int GameState::game5x5(RenderWindow& window, Event& event, Vector2f mouse) {
-	gameload5x5(window, event);
-	playerFunction(event, mouse, 5, 5, true);
-	drawKrzyzykAndKolko(window, 5, 5, true);
-
-	if (max5x5 == 0) {
-		if (checkWin(window, true) == KRZYZYK) {
-			std::cout << "WYGRANA" << std::endl;
-			max5x5 = 25;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_WIN;
-		}
-		else if (checkWin(window, true) == KOLKO) {
-			max5x5 = 25;
-			std::cout << "PRZEGRANA" << std::endl;
-			music.playLostMusic();
-			waiting(1);
-			return STATE_LOSE;
-		}
-		else {
-			std::cout << "REMIS" << std::endl;
-			max5x5 = 25;
-			music.playLostMusic();
-			waiting(1);
-			return STATE_REMIS;
-		}
+int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector2f mouse, int numer) {
+	if (checker)
+	{
+		gameload(window, event, numer);
+		srand(time(NULL));
+		checker = false;
 	}
-	else {
-		if (AI)
+	doIt(window, numer);
+	drawKrzyzykAndKolko(window, numer, numer);
+	playerFunctionMultiplayer(event, mouse, numer, numer);
+	if (checkWin(Player::HUMAN, tablica, numer, numer)) {
+		checker = true;
+		return STATE_WIN;
+	}
+	if (!isMovesLeft(tablica, numer, numer)) {
+		checker = true;
+		return STATE_REMIS;
+	}
+	if (checkWin(Player::AI, tablica, numer, numer)) {
+		checker = true;
+		return STATE_LOSE;
+	}
+	return pauseButton(mouse, event, STATE_GAME_MULTIPLAYER_OFFLINE);
+}
+int GameState::symulation(RenderWindow& window, Event& event, Vector2f mouse, int licznik_symulacji, int numer) {
+	srand(time(NULL));
+	liczba_win = 0;
+	liczba_lose = 0;
+	liczba_remis = 0;
+	for (int i = 0; i < licznik_symulacji; i++) {
+		if (checker)
 		{
-			AIFunction(5, 5, true);
-			AI = false;
+			gameload(window, event, numer);
+			checker = false;
+			checker_simulate = true;
 		}
+		while (true) {
+			doIt(window, numer);
+			drawKrzyzykAndKolko(window, numer, numer);
+			if (checkWin(Player::HUMAN, tablica, numer, numer)) {
+				checker = true;
+				liczba_win++;
+				break;
+			}
+			if (!isMovesLeft(tablica, numer, numer)) {
+				checker = true;
+				liczba_remis++;
+				break;
+			}
+			if (checkWin(Player::AI, tablica, numer, numer)) {
+				checker = true;
+				liczba_lose++;
+				break;
+			}
+			if (AI_check)
+			{
+				if (numer == 3) {
+					Move AImove = minimax(tablica, numer, numer);
+					tablica.getBoard()[AImove.i][AImove.j].setStatus(KOLKO);
+				}
+				else if (numer == 4) {
+					//AIFunction(Player::HUMAN, tablica, numer, numer);
+					Move AImove = findBestMove(tablica, numer, numer);
+					tablica.getBoard()[AImove.i][AImove.j].setStatus(KOLKO);
+				}
+				else {
+					//AIFunction(Player::HUMAN, tablica, numer, numer);
+					Move AImove = findBestMove(tablica, numer, numer);
+					tablica.getBoard()[AImove.i][AImove.j].setStatus(KOLKO);
+				}
+				AI_check = false;
+			}
+			else {
+				if (numer == 3) {
+					if (checker_simulate) {
+						tablica.getBoard()[1][1].setStatus(KRZYZYK);
+						checker_simulate = false;
+					}
+					else {
+						Move AImove = minimax(tablica, numer, numer);
+						tablica.getBoard()[AImove.i][AImove.j].setStatus(KRZYZYK);
+						music.playKrzyzykMusic();
+					}
+				}
+				else if (numer == 4) {
+					//AIFunction(Player::AI, tablica, numer, numer);
+					Move AImove = findBestMove(tablica, numer, numer);
+					tablica.getBoard()[AImove.i][AImove.j].setStatus(KRZYZYK);
+					music.playKrzyzykMusic();
+				}
+				else {
+					/*if (checker_simulate) {
+						while (true) {
+							x_rand = rand() % numer;
+							y_rand = rand() % numer;
 
-		if (checkWin(window, true) == KRZYZYK) {
-			std::cout << "WYGRANA" << std::endl;
-			max5x5 = 25;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_WIN;
+							if (tablica.getBoard()[x_rand][y_rand].getStatus() == KRZYZYK || tablica.getBoard()[x_rand][y_rand].getStatus() == KOLKO)
+								continue;
+							else {
+								tablica.getBoard()[x_rand][y_rand].setStatus(KRZYZYK);
+								x_temp = x_rand;
+								y_temp = y_rand;
+								break;
+							}
+						}
+						checker_simulate = false;
+					}
+					else {*/
+						//AIFunction(Player::AI, tablica, numer, numer);
+						Move AImove = findBestMove(tablica, numer, numer);
+						tablica.getBoard()[AImove.i][AImove.j].setStatus(KRZYZYK);
+						music.playKrzyzykMusic();
+					//}
+					
+				}
+				AI_check = true;
+			}
+			window.display();
 		}
-
-		if (checkWin(window, true) == KOLKO) {
-			max5x5 = 25;
-			std::cout << "PRZEGRANA" << std::endl;
-			music.playLostMusic();
-			waiting(1);
-			return STATE_LOSE;
-		}
+		window.display();
 	}
-	
-	return STATE_GAME_5x5;
-}
-
-int GameState::gameMultiplayerOffline(RenderWindow& window, Event& event, Vector2f mouse) {
-	gameload(window, event);
-	playerFunctionMultiplayer(event, mouse, 3, 3, false);
-	drawKrzyzykAndKolko(window, 3, 3, false);
-
-	if (max == 0) {
-		if (checkWin(window, false) == KRZYZYK) {
-			std::cout << "WYGRANA KZYZYKA" << std::endl;
-			max = 9;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_WIN;
-		}
-		else if (checkWin(window, false) == KOLKO) {
-			max = 9;
-			std::cout << "WYGRANA KOLKA" << std::endl;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_LOSE;
-		}
-		else {
-			max = 9;
-			std::cout << "REMIS" << std::endl;
-			music.playLostMusic();
-			waiting(1);
-			return STATE_REMIS;
-		}
-	}
-	else {
-
-		if (checkWin(window, false) == KRZYZYK) {
-			std::cout << "WYGRANA KRZYZYKA" << std::endl;
-			max = 9;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_WIN;
-		}
-
-		if (checkWin(window, false) == KOLKO) {
-			max = 9;
-			std::cout << "WYGRANA KOLKA" << std::endl;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_LOSE;
-		}
-	}
-
-	return pauseButton(mouse, event,STATE_GAME_MULTIPLAYER_OFFLINE);
-}
-
-int GameState::gameMultiplayerOffline5x5(RenderWindow& window, Event& event, Vector2f mouse) {
-	gameload5x5(window, event);
-	playerFunctionMultiplayer(event, mouse, 5, 5, true);
-	drawKrzyzykAndKolko(window, 5, 5, true);
-
-	if (max5x5 == 0) {
-		if (checkWin(window, true) == KRZYZYK) {
-			std::cout << "WYGRANA KZYZYKA" << std::endl;
-			max = 25;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_WIN;
-		}
-		else if (checkWin(window, true) == KOLKO) {
-			max = 25;
-			std::cout << "WYGRANA KOLKA" << std::endl;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_LOSE;
-		}
-		else {
-			max = 25;
-			std::cout << "REMIS" << std::endl;
-			music.playLostMusic();
-			waiting(1);
-			return STATE_REMIS;
-		}
-	}
-	else {
-
-		if (checkWin(window, true) == KRZYZYK) {
-			std::cout << "WYGRANA KRZYZYKA" << std::endl;
-			max = 25;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_WIN;
-		}
-
-		if (checkWin(window, true) == KOLKO) {
-			max = 25;
-			std::cout << "WYGRANA KOLKA" << std::endl;
-			music.playWinMusic();
-			waiting(1);
-			return STATE_LOSE;
-		}
-	}
-
-	return pauseButton(mouse, event, STATE_GAME_MULTIPLAYER_OFFLINE_5x5);
+	return STATE_SYMULATION_RESULT;
 }

@@ -67,6 +67,37 @@ void EndState::loadRemisGraphics(RenderWindow& window) {
 	window.draw(winKolko);
 }
 
+void EndState::loadText(RenderWindow& window) {
+	winFont.loadFromFile("Resources/fonts/ITCKRIST.ttf");
+	loseFont.loadFromFile("Resources/fonts/ITCKRIST.ttf");
+	remisFont.loadFromFile("Resources/fonts/ITCKRIST.ttf");
+
+	if (!winXSymulacjaTexture.loadFromFile("Resources/res/Wygrana X symulacja.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	winXSymulacja.setTexture(winXSymulacjaTexture);
+	if (!winOSymulacjaTexture.loadFromFile("Resources/res/Wygrana O symulacja.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	winOSymulacja.setTexture(winOSymulacjaTexture);
+	if (!remisSymulacjaTexture.loadFromFile("Resources/res/Remis symulacja.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	remisSymulacja.setTexture(remisSymulacjaTexture);
+
+	winXSymulacja.setPosition(285, 150);
+	winOSymulacja.setPosition(285, 300);
+	remisSymulacja.setPosition(285, 450);
+	window.draw(winXSymulacja);
+	window.draw(winOSymulacja);
+	window.draw(remisSymulacja);
+
+	if (!retryTexture.loadFromFile("Resources/res/Retry Button.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+
+	retryButton.setTexture(retryTexture);
+	retryButton.setPosition(385, 700);
+	window.draw(retryButton);
+}
+
+
 int EndState::lose(RenderWindow& window, Event& event, Vector2f mouse, int state) {
 	
 	loadBackground(window);
@@ -173,4 +204,53 @@ int EndState::remis(RenderWindow& window, Event& event, Vector2f mouse, int stat
 	}
 
 	return STATE_REMIS;
+}
+
+int EndState::symulacja(RenderWindow& window, Event& event, Vector2f mouse, int win, int lose, int remis, int state) {
+	loadBackground(window);
+	homeLoad(window);
+	closeLoad(window);
+	loadText(window);
+	Text winText(std::to_string(win), winFont);
+	Text loseText(std::to_string(lose), loseFont);
+	Text remisText(std::to_string(remis), remisFont);
+	winText.setCharacterSize(70);
+	loseText.setCharacterSize(70);
+	remisText.setCharacterSize(70);
+	winText.setFillColor(Color::White);
+	loseText.setFillColor(Color::White);
+	remisText.setFillColor(Color::White);
+	winText.setPosition(442,205);
+	loseText.setPosition(442, 355);
+	remisText.setPosition(442, 505);
+	window.draw(winText);
+	window.draw(loseText);
+	window.draw(remisText);
+
+	if (retryButton.getGlobalBounds().contains(mouse)) {
+		if (event.type == Event::MouseButtonPressed) {
+			if (event.mouseButton.button == Mouse::Left) {
+				return state;
+			}
+		}
+	}
+
+	if (homeButton.getGlobalBounds().contains(mouse)) {
+		if (event.type == Event::MouseButtonPressed) {
+			if (event.mouseButton.button == Mouse::Left) {
+				std::cout << "Wcisnalem home" << std::endl;
+				return STATE_MENU;
+			}
+		}
+	}
+
+	if (closeButton.getGlobalBounds().contains(mouse)) {
+		if (event.type == Event::MouseButtonPressed) {
+			if (event.mouseButton.button == Mouse::Left) {
+				window.close();
+			}
+		}
+	}
+
+	return STATE_SYMULATION_RESULT;
 }
