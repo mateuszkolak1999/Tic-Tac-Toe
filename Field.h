@@ -4,25 +4,27 @@
 #include "DEFINIONS.h"
 
 using namespace sf;
-class Field: Drawable
+class Field : Drawable
 {
 private:
 	int X;
 	int Y;
 	int marginX;
 	int marginY;
-	int size = 146;
+	int size{ 146 };
+	int odleglosc{ 10 };
 	int status = PUSTE_POLE;		//0 - puste, 1 - kó³ko, 2 - krzy¿yk
 	Texture texture;
 	RectangleShape field;
 
 public:
-	Field(int X=0, int Y=0, int marginX=0, int marginY=0);
+	Field(int X = 0, int Y = 0, int marginX = 0, int marginY = 0, int size = 146, int odleglosc = 10);
 	int getX();
 	int getY();
 	int getMarginX();
 	int getMarginY();
 	int getSize();
+	int getOdleglosc();
 	int getStatus();
 	RectangleShape getField();
 	Texture getTexture();
@@ -32,6 +34,7 @@ public:
 	void setMarginX(int marginX);
 	void setMarginY(int marginY);
 	void setSize(int size);
+	void setOdleglosc(int odleglosc);
 	void setStatus(int status);
 	void setTexture(String string);
 	void setField(RectangleShape shape);

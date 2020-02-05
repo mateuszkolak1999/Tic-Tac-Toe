@@ -8,6 +8,7 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 	window.draw(spriteName);
 	window.draw(playSprite);
 	window.draw(multiplayerButton);
+	window.draw(symulacjaButton);
 	window.draw(settingsButton);
 	window.draw(rulesButton);
 	window.draw(exitButton);
@@ -18,7 +19,7 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << "Wcisnalem singleplayer" << std::endl;
-				return STATE_MENU_SINGLEPLAYER;
+				return STATE_GAME;
 			}
 		}
 	}
@@ -29,7 +30,18 @@ int MenuState::play(RenderWindow& window, Event& event, Vector2f mouse) {
 		if (event.type == Event::MouseButtonPressed) {
 			if (event.mouseButton.button == Mouse::Left) {
 				std::cout << "Wcisnalem gra multiplayer" << std::endl;
-				return STATE_MENU_MULTIPLAYER;
+				return STATE_GAME_MULTIPLAYER_OFFLINE;
+			}
+		}
+	}
+
+	if (symulacjaButton.getGlobalBounds().contains(mouse)) {
+		symulacjaButton.setTexture(symulacjaButton_checked);
+		window.draw(symulacjaButton);
+		if (event.type == Event::MouseButtonPressed) {
+			if (event.mouseButton.button == Mouse::Left) {
+				std::cout << "Wcisnalem symulacje" << std::endl;
+				return STATE_SIMULATE;
 			}
 		}
 	}
@@ -71,7 +83,7 @@ void MenuState::loadPlayButton() {
 	if (!texture.loadFromFile("Resources/res/Tryb jednoosobowy.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	playSprite.setTexture(texture);
-	playSprite.setPosition(280, 300);
+	playSprite.setPosition(200, 300);
 
 	if (!texture_checked.loadFromFile("Resources/res/Tryb jednoosobowy — zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
@@ -79,15 +91,23 @@ void MenuState::loadPlayButton() {
 	if (!textureMultiplayer.loadFromFile("Resources/res/Tryb wieloosobowy.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	multiplayerButton.setTexture(textureMultiplayer);
-	multiplayerButton.setPosition(480, 400);
+	multiplayerButton.setPosition(400, 300);
 
 	if (!multiplayerButton_checked.loadFromFile("Resources/res/Tryb wieloosobowy — zaznaczony.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+
+	if (!textureSymulacja.loadFromFile("Resources/res/Symulacja.png"))
+		std::cout << "Blad ladowania textury" << std::endl;
+	symulacjaButton.setTexture(textureSymulacja);
+	symulacjaButton.setPosition(600, 300);
+
+	if (!symulacjaButton_checked.loadFromFile("Resources/res/Symulacja - zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 
 	if (!textureSettings.loadFromFile("Resources/res/Ustawienia.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	settingsButton.setTexture(textureSettings);
-	settingsButton.setPosition(280, 500);
+	settingsButton.setPosition(300, 500);
 
 	if (!settingsButton_checked.loadFromFile("Resources/res/Ustawienia — zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
@@ -95,7 +115,7 @@ void MenuState::loadPlayButton() {
 	if (!textureRules.loadFromFile("Resources/res/Osi¹gniêcia.png"))
 		std::cout << "Blad ladowania textury" << std::endl;
 	rulesButton.setTexture(textureRules);
-	rulesButton.setPosition(480, 600);
+	rulesButton.setPosition(500, 500);
 
 	if (!textureRules_checked.loadFromFile("Resources/res/Osi¹gniêcia — zaznaczony.png"))
 		std::cout << "Blad ladowania textury" << std::endl;

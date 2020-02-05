@@ -1,16 +1,20 @@
 #include "Field.h"
 
-Field::Field(int X, int Y, int marginX, int marginY) {
+Field::Field(int X, int Y, int marginX, int marginY, int size, int odleglosc) {
 	this->X = X;
 	this->Y = Y;
 	this->marginX = marginX;
 	this->marginY = marginY;
 
 	//ustawianie pola
-	field.setFillColor(Color::Transparent);
-	field.setSize(Vector2f(size,size));
-	field.setPosition((float)marginX + X * (size + 14),(float) marginY + Y * (size + 14));
+	field.setFillColor(Color::Color(54, 56, 68)/*Blue*//*Transparent*/);
+	field.setSize(Vector2f(size, size));
+	if (!texture.loadFromFile("Resources/res/field.png"))
+		std::cout << "Blad ladowania tekstury" << std::endl;
 
+	field.setTexture(&texture);
+	field.setOrigin(size, size);
+	field.setPosition(size + 30 + X * (size + odleglosc), size + 30 + Y * (size + odleglosc));
 }
 
 void Field::draw(RenderTarget& target, RenderStates states) const {
@@ -39,6 +43,10 @@ int Field::getSize() {
 
 int Field::getStatus() {
 	return status;
+}
+
+int Field::getOdleglosc() {
+	return odleglosc;
 }
 
 RectangleShape Field::getField() {
@@ -75,6 +83,10 @@ void Field::setMarginY(int marginY) {
 
 void Field::setSize(int size) {
 	this->size = size;
+}
+
+void Field::setOdleglosc(int odleglosc) {
+	this->odleglosc = odleglosc;
 }
 
 void Field::setStatus(int status) {

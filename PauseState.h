@@ -8,13 +8,15 @@ class PauseState
 {
 private:
 	Texture texture;
-	Sprite playagain;
+	Sprite close;
+
+	Texture textureMenu;
+	Sprite menu;
 	
 	Texture texture_background;
 	Sprite background;
-	int state;
 
 public:
-	int pause(RenderWindow& window, Event& event, Vector2f mouse, int state);
+	int pause(RenderWindow& window, Event& event, Vector2f mouse);
 };
 

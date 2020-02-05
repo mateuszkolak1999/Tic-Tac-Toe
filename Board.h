@@ -1,27 +1,47 @@
 #pragma once
 #include "DEFINIONS.h"
 #include "Field.h"
+
 class Board
 {
 private:
-	Texture texture;
-	Sprite boardSprite;
-
-	Texture textureBoard5x5;
-	Sprite boardSprite5x5;
-
-	void setBoardSprite();
-	void setBoardSprite5x5();
-
+	int length{ 3 };
+	int width{ 3 };
+	int lengthBoard{ 0 };
+	int widthBoard{ 0 };
+	int a{ 0 };
+	int b{ 0 };
+	bool check{ true };
+	RectangleShape ramka;
+	Field** board;
 public:
-	Field board[BOARD_LENGTH_3][BOARD_WIDTH_3];
-	Field board5x5[BOARD_LENGTH_5][BOARD_WIDTH_5];
+	Board(int length = 3, int width = 3, int margin_X = 0, int margin_Y = 0);
+	Board(Board& tablica);
+	~Board();
 
-	void loadBoard(int length, int width, int margin_X, int margin_Y, bool table5x5);
-	void clearBoard(int length, int width, bool table5x5);
-	void drawBoard(RenderWindow &window, int length, int width, bool table5x5);
+	void clear();
+	void setLength(int length);
+	void setWidth(int width);
+	void setLengthBoard(int lengthBoard);
+	void setWidthBoard(int widthBoard);
+	void setA(int a);
+	void setB(int b);
+	void setCheck(bool check);
+	void setRamka(RectangleShape ramka);
+	void setBoard(Field** board);
 
-	Sprite getBoardSprite();
-	Sprite getBoardSprite5x5();
+	int getLength();
+	int getWidth();
+	int getLengthBoard();
+	int getWidthBoard();
+	int getA();
+	int getB();
+	bool getCheck();
+	RectangleShape getRamka();
+	Field** getBoard();
+
+	void drawMap(RenderWindow& window);
+	void scaleBoard(RenderWindow& window);
+	void boardSetTexture();
 };
 
