@@ -90,7 +90,7 @@ private:
 	Vector2f newScaleKrzyzykAndKolko;
 	float scaleKrzyzykAndKolko;
 
-	//int licznik = 0;
+	int licznik = 0;
 
 	int liczba_win{ 0 };
 	int liczba_lose{ 0 };
